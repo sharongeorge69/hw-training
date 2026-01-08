@@ -1,0 +1,24 @@
+Introduction to open source community
+1.Internet fundamentals and how it works
+2.Servers and virtual servers
+3.HTTP vs HTTPS and request-response cycle
+4.HTTP status codes overview
+5.APIs and real-world usage
+
+Work environment setup and tools overview
+1.VS Code and Sublime Text
+2.IPython basics
+3.Git basics and installation
+4.MongoDB and Compass overview
+
+Git concepts and workflow
+1.Common Git commands
+2.CI/CD basics
+3.Effective use of Git in projects
+
+Learned about Data formats
+1.JSON
+2.CSV, TSV
+3.XML
+
+Learned to add training.log to track daily progress.
