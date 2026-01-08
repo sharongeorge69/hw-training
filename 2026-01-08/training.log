@@ -1,0 +1,25 @@
+Learned and had an overview of the following concepts
+
+Basic Linux commands and their usage
+Package managers overview
+apt-get usage
+pip and ipython overview
+
+Terminal text editors
+Editing and saving files using nano
+Vim editor basics
+
+IDEs and editors overview
+Sublime Text
+Visual Studio Code
+
+Virtual environments concept
+Created Python3 virtual environment
+Installed Scrapy inside virtual environment
+
+Installed Scrapy using apt
+Uninstalled Scrapy using apt
+Installed Scrapy using pip
+Uninstalled Scrapy using pip
+
+Scrapy shell usage
