@@ -2,3 +2,28 @@ Learned about the basics of Python
 Identation rule in python
 Different Data Types
 Completed Task 2.A: Student Marks and Report Generator
+Completed Task 2.B Grocery Store - Data Oraganiser
+
+MongoDB basics and setup
+- Introduction to MongoDB
+- Starting, enabling, and checking MongoDB service
+- Installing and using MongoDB shell (mongosh)
+- Connecting to MongoDB on localhost
+
+MongoDB shell and core operations
+- MongoDB shell overview
+- Database and collection management
+- Common shell commands (show dbs, use db, collections, stats)
+- Insert and bulk insert operations
+- Update and delete operations
+- Import, export, dump, and restore operations
+
+Advanced MongoDB concepts and Compass
+- Index creation and unique indexes
+- ObjectId concept and timestamp extraction
+- Sharding, clustering (replica sets), and nodes
+- MongoDB best practices and guidelines
+- Data backup strategies
+- MongoDB Compass installation and usage
+- Documents, aggregations, schema, and validation in Compass
+
