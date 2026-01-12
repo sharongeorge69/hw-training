@@ -1,0 +1,31 @@
+Learned and had an overview of the following topics
+
+Object-Oriented Programming (OOP) Fundamentals
+- Studied core OOP concepts and structure.
+- Implementation of Classes and Objects.
+- Understanding the 'self' argument in instance methods.
+- Managing object lifecycle using Constructors (__init__) and Destructors (__del__).
+
+Advanced Functional Programming
+- Deep dive into Function definitions and scoping.
+- Handling dynamic inputs using Positional arguments (*args) and Keyword arguments (**kwargs).
+- Comparative analysis: 'return' vs 'yield' for data output.
+
+Memory Management & Iterators
+- Understanding Python memory references and object IDs.
+- Implementing Generators for memory-efficient data processing.
+- Utilizing List Comprehensions for concise and readable code.
+
+Exception Handling & Error Management
+- Differentiating between Exceptions and syntax errors.
+- Implementing robust error handling using 'try...except...finally' blocks.
+
+I/O Operations & Modularization
+- Performing File operations (Read/Write/Append).
+- Mastering Module importing and namespace management.
+- Modern String formatting techniques (f-strings and .format()).
+
+Best Practices & Optimization
+- Reviewing Advanced Python design patterns.
+- Auditing code for PEP8 compliance (Python Standards).
+- Strategies for code readability, optimization, and long-term maintenance.
