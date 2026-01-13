@@ -1,0 +1,22 @@
+Familiarize with common Python packages and usages 
+
+Web Communication & Scraping
+Utilizing 'requests' and 'urllib' for HTTP requests and API interaction.
+Parsing HTML/XML data using 'parsel', 'lxml', and 'xml' libraries.
+Managing URL encoding and decoding.
+
+Handling structured data with 'json' and 'csv' (Reading/Writing).
+implementing Regex patterns using the 're' module for data validation.
+Encoding and decoding binary data using 'base64'.
+Using 'ast' (Abstract Syntax Trees) for literal evaluation of strings.
+
+Infrastructure & Messaging: Explored Mongodb database interaction using pymongo.
+Basic implementation of Message Queues using 'pika' (RabbitMQ client).
+ 
+Automated file system tasks using the os module. 
+Set up professional logging configurations to replace print statements.
+
+Used IPython for interactive development and handled time-sensitive logic with datetime and time.
+Had an overview about boto3, dropbox APIs, and ftplib.
+
+Overview about js2py for JS integration.
