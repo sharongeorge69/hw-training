@@ -1,0 +1,18 @@
+Advanced python concepts - Training Task 
+Site : Bayut (commercial rental site in Baharin)
+
+Designed the architectural blueprint for a mini data mining system following OOP best practices
+Separated configuration from logic by creating settings.py and importing it into the main module. 
+
+Initialized the BayutParser class with proper headers and URL handling.
+
+Integrated the requests library to fetch HTML data with a defined timeout. 
+
+Developed file I/O methods to persist raw HTML and cleaned text data to the local file system.
+Implemented data parsing logic using XPath (via lxml/etree) to extract property details. 
+
+Used List Comprehensions to efficiently filter out entries with null prices and extract product names.
+
+Enhanced code reliability by creating a custom DataMiningError exception class.
+
+Applied PEP8 standards to ensure code readability and maintainability.
