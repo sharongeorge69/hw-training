@@ -15,4 +15,12 @@ Used List Comprehensions to efficiently filter out entries with null prices and 
 
 Enhanced code reliability by creating a custom DataMiningError exception class.
 
-Applied PEP8 standards to ensure code readability and maintainability.
+Learning Tasks for 2026-01-14
+
+Using Inspect - Tabs to analyze the DOM. Handling Client-side JavaScript execution and AJAX-loaded URLs.
+
+Understanding Request/Response headers, managing Cookies and sessions, and rotating User-agents.
+
+Mastering GET, POST, PUT, DELETE, HEAD, PATCH, OPTIONS. API identification for data scraping.
+
+Sitemaps usage: exploring possibilities and limitations for crawling automation.
