@@ -1,0 +1,20 @@
+Learning and Training task for 2026-01-15
+
+How to write an XPath and understanding basic XPath 
+syntax (absolute vs. relative paths).
+
+Using contains(), starts-with(), last(), position(), and count().
+
+Implementing XPath conditions
+
+strategies for writing a better XPath
+
+Browser Analysis Task 
+
+Site : https://www.flipkart.com/mens-footwear/sports-shoes/pr?sid=osp,cil,1cu&otracker=categorytree
+
+Inspecting the landing page and identifying the Category Name.
+
+Identifying the AJAX URL, Request Method, and Status Codes.
+
+Analyzing Request/Response Headers and Response Cookies.
