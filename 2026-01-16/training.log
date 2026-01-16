@@ -1,0 +1,13 @@
+Training Task : Python packages and xpath 
+
+site : https://www.marksandspencer.com/ (UK)
+
+Scraping sitemaps with xml/lxml. Using requests and parsel to extract PDP URLs and pagination from PLP pages.
+
+Building comprehensive XPaths for 20+ PDP fields. Using re for dress fields and datetime for timestamps.
+
+Implementing robust try/except blocks and logging levels for the extraction pipeline.
+
+Cleaning data and inserting records into MongoDB using pymongo.
+
+Exporting to JSON and CSV . Writing scripts to convert between formats.
