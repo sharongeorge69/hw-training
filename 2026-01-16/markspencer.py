@@ -172,6 +172,7 @@ def extract_pdp_fields(sel: Selector, pdp_url: str) -> dict:
                 items = bc.get('itemListElement', [])
                 names = [i.get('item', {}).get('name', '').strip() for i in items if i.get('item')]
                 product["breadcrumb"] = " > ".join(names)
+                #Sets the category to the last item in the breadcrumb
                 if names:
                     product["category"] = names[-1]
         except:
