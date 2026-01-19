@@ -129,7 +129,7 @@ def scrape_plp(start_url, max_pages=MAX_PLP_PAGES):
     return list(pdp_urls)
 
 
-#   PDP EXTRACTION (your logic)
+#   PDP EXTRACTION
 def extract_pdp_fields(sel: Selector, pdp_url: str) -> dict:
     product = {
         "pdp_url": pdp_url,
