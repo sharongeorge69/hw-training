@@ -157,7 +157,7 @@ def extract_pdp_fields(sel: Selector, pdp_url: str) -> dict:
 
     # 1. unique_id
     code_text = sel.xpath("substring-after(//p[contains(text(), 'Product code')], 'Product code: ')").get("")
-    product["unique_id"] = code_text.strip() or re.search(r'/([a-z0-9]{8,})$', pdp_url, re.I).group(1) if not code_text else code_text
+    product["unique_id"] = code_text.strip()
 
     # 2. product_name
     product["product_name"] = sel.xpath("//h1[@class='media-0_headingSm__aysOm']/text()").get("") or \
