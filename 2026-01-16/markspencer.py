@@ -160,8 +160,8 @@ def extract_pdp_fields(sel: Selector, pdp_url: str) -> dict:
     product["unique_id"] = code_text.strip()
 
     # 2. product_name
-    product["product_name"] = sel.xpath("//h1[@class='media-0_headingSm__aysOm']/text()").get("") or \
-                              sel.xpath("//h1/text()").get("N/A").strip()
+    product["product_name"] = sel.xpath("//h1[@class='media-0_headingSm__aysOm']/text()").get("N/A").strip()
+
 
     # Breadcrumb + category
     bc_script = sel.xpath("//script[@type='application/ld+json' and contains(text(), 'BreadcrumbList')]/text()").get()
