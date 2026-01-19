@@ -1,0 +1,23 @@
+Learning Task : Request Methods and Scrapy Framework
+
+Request and FormRequest objects. Utilizing Scrapy Shell.
+
+Understanding Request & Response handling logic, 
+Post requests & payloads and managing Cookies/Sessions.
+
+Configuring HTTP/HTTPS Proxies, Certificate verification, 
+and Exceptions, understanding nohup.
+
+Training Task : Convert the Intake task from Scrapy to Python
+
+Site : https://www.bayut.bh/en/to-rent/commercial/bahrain/
+
+Deconstructed the Scrapy Spider structure to recreate a standalone Developer Intake task in pure Python.
+
+Developed manual crawling logic to replace the Scrapy engine, implementing a while loop for multi-page pagination handling.
+
+Conducted a test run on the Bayut Bahrain commercial properties section.
+
+Extracted 18 unique data fields, including property IDs, pricing, and agent details.
+
+Validated the final output against the original developer intake requirements.
