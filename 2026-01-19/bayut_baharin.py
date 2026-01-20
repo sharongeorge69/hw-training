@@ -16,7 +16,7 @@ class BayutScraper:
         self.session.headers.update(self.headers)
         self.data_list = []
         
-        # Fields matches the scrapy Item definition
+        #fields 
         self.fields = [
             "reference_number", "id", "url", "purpose", "title", "description",
             "location", "price", "currency", "price_per", "furnished",
@@ -84,7 +84,8 @@ class BayutScraper:
         item["furnished"] = furn_list[0].strip() if furn_list else None
         
         # amenities
-        item["amenities"] = tree.xpath("//div[contains(@class,'dd50d995')]//span/text()")
+        raw_amenities = tree.xpath("//div[contains(@class,'dd50d995')]//span/text()")
+        item["amenities"] = list(dict.fromkeys([a.strip() for a in raw_amenities if a.strip()]))
         
         # details
         det_list = tree.xpath("//span[@aria-label='Area']//span/text()")
@@ -107,7 +108,7 @@ class BayutScraper:
         return item
 
 
-    def run(self, max_pages=1):
+    def run(self, max_pages=2):
         #run the scraper 
         next_url = self.base_url
         page_count = 0
@@ -145,7 +146,7 @@ class BayutScraper:
         self.save_files()
 
     def save_files(self):
-        """Saves scraped data to JSON and CSV."""
+        #aves scraped data to JSON and CSV
         if not self.data_list:
             print("No data collected.")
             return
@@ -177,4 +178,4 @@ class BayutScraper:
 if __name__ == "__main__":
     scraper = BayutScraper()
     # Scrape 1 page by default for testing, user can adjust
-    scraper.run(max_pages=1)
+    scraper.run(max_pages=2)
