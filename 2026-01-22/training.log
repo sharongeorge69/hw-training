@@ -11,4 +11,17 @@ each profile link to grab the long description bios.
 Adding time.sleep() ,Implementing impersonate= "chrome120"
 to stay undetected.
 
-Documentation & Log Update
+Documentation & Log Update for kentwood site
+
+Experimented on using requests.Session and different
+user agents
+ 
+Practiced using the re module
+
+Received the new training assignment and started 
+the initial setup.
+
+site : https://styleunion.in/
+
+Used the browser's Inspect tool to find the exact containers
+where the product or agent information lives
