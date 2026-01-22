@@ -3,12 +3,12 @@ import time
 from curl_cffi import requests
 from parsel import Selector
 
-# Setting up our basic scraper configuration
+# Setting up the configuration
 URL = "https://www.kentwood.com/CMS/CmsRoster/RosterSearchResults"
 OUTPUT_FILE = "kentwood_agents.json"
 PAGE_SIZE = 10
 
-# Helper function to tidy up messy text (removes extra spaces and newlines)
+# Helper function to tidy up messy text 
 def clean_text(text):
     if not text:
         return ""
@@ -29,13 +29,13 @@ def parse_name(full_name):
         last_name = parts[1]
     return first_name, middle_name, last_name
 
-# These headers are CRITICAL. They make our script look exactly like a real Chrome browser.
-# We copied these from a real browser session to bypass the "403 Forbidden" Cloudflare blocks.
+# Bio-Header to make the  script look exactly like a real Chrome browser.
+# Used to bypass the "403 Forbidden" Cloudflare blocks.
 BIO_HEADERS = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'accept-language': 'en-US,en;q=0.9,ml;q=0.8',
     'cache-control': 'max-age=0',
-    # The 'cookie' contains the session ID which proves we are a valid user
+    # The 'cookie' contains the session ID to mimic real user
     'cookie': 'subsiteID=278950; subsiteDirectory=; culture=en; ASP.NET_SessionId=ehj5hdkcmfzu3tamdzozw2sj; currencyAbbr=USD; currencyCulture=en-US; _gid=GA1.2.990041556.1768970341; OptanonAlertBoxClosed=2026-01-21T04:39:05.102Z; _hjSessionUser_2481254=eyJpZCI6ImFkMDcwMjZlLTc4NGQtNWI4NS04MTY1LTM3MGY1NDMyNTM4YiIsImNyZWF0ZWQiOjE3Njg5NzAzNDE2MzYsImV4aXN0aW5nIjp0cnVlfQ==; _cfuvid=Qpwegm2bPTrGwsR4uIGx9IW62PJabeSHFLE2ftuJUp0-1768986326444-0.0.1.1-604800000; rnSessionID=662124604422120032; _hjSession_2481254=eyJpZCI6IjZlYzY0MDExLTU1YjYtNGJmZS04MDRmLTRkYzRiZTYyZTUxYiIsImMiOjE3Njg5OTA4MTUwMjgsInMiOjAsInIiOjAsInNiIjowLCJzciI6MCwic2UiOjAsImZzIjowLCJzcCI6MH0=; __cf_bm=D_CZmzg.pETM4_53ky8g_L2Wj6g.OmSabJHwzgpVFHE-1768995258-1.0.1.1-7wTRJWi.rYaElLs6kmRlKRmqEx3tASFszA73LGd5h4TSUTVEga1pQbUwC1qL4ilOdzpKMSvOQrsXsKGZHtq2RXjDJs8V.qgAJN18AFMcbic; cf_clearance=P2KUzTU1uFeK33fU67kxhDCqyAvoO9Qrif3FIRldizY-1768995263-1.2.1.1-2_6RV0y59c0jppHPsm2KBSRiQvTB1cCpN6Rwc.VSkcnpWSbkT3SRLqOmNC7epNp71gfEJVgIGFc6jqEjE3SmnK_ij3aCxsTs1m0TaknwVBsGhcKzMEwA0H26.7fmfboWgIPVCQMmpxrVeX2ly0n0uP3wK756CtLIzz__7i_kxIsEKneHHrqwb3FllaR6xX8ikrWbDNWWubTKs1pKPEhPLfcGX7MRbOwh..ihUq9BSjKRcCH0XvSOJcvn6u_ZKOWC; _ga=GA1.1.812340961.1768970341; _ga_X66CHF3N5R=GS2.1.s1768989700$o4$g1$t1768995469$j59$l0$h0; OptanonConsent=isGpcEnabled=0&datestamp=Wed+Jan+21+2026+17%3A07%3A49+GMT%2B0530+(India+Standard+Time)&version=202509.1.0&browserGpcFlag=0&isIABGlobal=false&hosts=&landingPath=NotLandingPage&groups=C0003%3A1%2CC0001%3A1%2CC0005%3A1%2CC0002%3A1%2CC0004%3A1%2COSSTA_BG%3A1&geolocation=IN%3BKL&AwaitingReconsent=false',
     'priority': 'u=0, i',
     'sec-ch-ua': '"Google Chrome";v="143", "Chromium";v="143", "Not A(Brand";v="24"',
@@ -63,13 +63,13 @@ LIST_HEADERS["referer"] = "https://www.kentwood.com/roster/agents/"
 def scrape_agents():
     agents = []
     
-    # We will track pagination manually
+    # track pagination manually
     page_number = 1
     total_count = None
 
     print("--- Phase 1: Getting the Agent List ---")
     
-    # Keep looping through pages until we have collected everyone
+    # Keep looping through pages to collect everyone's bio-card
     while True:
         print(f"Fetching page {page_number}...")
         
@@ -85,21 +85,21 @@ def scrape_agents():
             # Send the request pretending to be Chrome ('impersonate="chrome120"')
             response = requests.get(URL, params=params, headers=LIST_HEADERS, impersonate="chrome120")
             
-            # If the server blocks us or errors out, stop.
+            # If the server blocks or errors out, stop.
             if response.status_code != 200:
                 print(f"Failed to fetch page {page_number}: {response.status_code}")
                 break
 
             # Parse the JSON response
             data = response.json()
-            # Sometimes the JSON comes as a string inside the JSON, so we double-parse if needed
+            # Sometimes the JSON comes as a string inside the JSON, double-parse if needed
             if isinstance(data, str):
                 try:
                     data = json.loads(data)
                 except json.JSONDecodeError:
                     pass
 
-            # Update the total count of agents (only needed once)
+            # Update the total count of agents
             if total_count is None:
                 total_count = data.get("TotalCount", 0)
                 print(f"Total Agents: {total_count}")
@@ -200,7 +200,7 @@ def scrape_agents():
 
     print("\n--- Phase 2: getting descriptions from profile pages... ---")
     
-    # Now loop through the agents we found to get their bios
+    # Now loop through the agents found to get their bios
     count = 0
     for agent in agents:
         p_url = agent["profile_url"]
@@ -220,7 +220,7 @@ def scrape_agents():
              
              if resp_bio.status_code == 200:
                  sel = Selector(text=resp_bio.text)
-                 # Look for the bio using the 'widget-text' ID pattern we found earlier
+                 # xpath for description
                  xpath = "//div[starts-with(@id, 'widget-text-1-preview-5503-')]"
                  desc_node = sel.xpath(xpath)
                  
@@ -237,10 +237,10 @@ def scrape_agents():
         except Exception as e:
             print(f"  > Error: {e}")
             
-        # Wait a bit between requests so we don't get banned
+        # Wait a bit between requests -- Prevent ban
         time.sleep(1.0)
 
-    # Finally, save everything to our JSON file
+    # Save file to output
     with open(OUTPUT_FILE, "w", encoding="utf-8") as f:
         json.dump(agents, f, indent=4, ensure_ascii=False)
     print(f"Saved {len(agents)} agents to {OUTPUT_FILE}")
