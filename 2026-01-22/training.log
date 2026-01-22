@@ -1,0 +1,14 @@
+Training Task to Scrape a website and extract required fields
+
+Site : https://www.kentwood.com/roster/agents/
+
+Learning how to use BIO_HEADERS and cookies to bypass 
+"403 Forbidden"" security blocks.
+
+Writing the main code to fetch the agent list and visiting 
+each profile link to grab the long description bios.
+
+Adding time.sleep() ,Implementing impersonate= "chrome120"
+to stay undetected.
+
+Documentation & Log Update
