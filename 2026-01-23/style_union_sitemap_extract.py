@@ -17,13 +17,13 @@ HEADERS = {
     "Connection": "keep-alive",
 }
 
-# Namespace usually found in sitemaps
+# Namespace to avoid naming conflicts
 NAMESPACES = {
     'ns': 'http://www.sitemaps.org/schemas/sitemap/0.9'
 }
 
 def fetch_xml(url):
-    """Fetches the XML content from a URL."""
+    #Fetches the XML content from a URL.
     try:
         print(f"Fetching: {url}")
         response = requests.get(url, headers=HEADERS, timeout=10)
@@ -39,13 +39,12 @@ def fetch_xml(url):
         return None
 
 def process_sitemap(url, product_urls):
-    """Recursively processes a sitemap URL."""
+    #Recursively processes a sitemap URL.
     root = fetch_xml(url)
     if root is None:
         return
 
-    # Check if it's a sitemap index (contains other sitemaps)
-    # Finding 'sitemap' tags
+    # Checking if the sitemap index contains other sitemaps
     sitemaps = root.findall('ns:sitemap', NAMESPACES)
     if sitemaps:
         print(f"Found {len(sitemaps)} sub-sitemaps in {url}")
@@ -92,11 +91,6 @@ def main():
         try:
             with open(OUTPUT_FILE, 'w', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
-                # writer.writerow(["Product URL"]) # Header optional based on prompt "one URL per line", but usually good. 
-                # Prompt said "one URL per line", listing sample implies bare list, but CSV usually implies header or comma separated.
-                # However "one URL per line" in a file usually suggests a plain text file or a single column CSV.
-                # I'll stick to single column, no header to strictly follow "one URL per line" as simple list often preferred
-                # but "CSV" implies it might open in Excel. I'll just write the URL.
                 for u in sorted_urls:
                     writer.writerow([u])
             print(f"\nSuccessfully saved URLs to {OUTPUT_FILE}")
