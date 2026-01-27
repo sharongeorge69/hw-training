@@ -1,6 +1,15 @@
 Training Task : Category  based Extraction 
 Site : https://styleunion.in/
 
-Worked on the Category Logic and Test ran it.Successfully extracted 76 Category URLs
+Worked on the Category Logic and Test ran it.Successfully extracted 76 Category URLs and saved it to mongodb.
+
+Worked on extracting product links from each category links and saved it to mongodb.
+
+Wrote code to remove duplicate product links found.
+
+Wrote code to parse different fields from the product links and saved it to mongodb.
+
+Queried scraped data from mongodb compass and removed "object id" and exported the data to csv.
+
 
 
