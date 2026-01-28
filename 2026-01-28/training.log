@@ -1,0 +1,17 @@
+Leraning to fetch data from api response
+
+Learning to bypass anti-bot systems
+
+Training Task : 
+
+site : https://www.fastenal.com/product/Adhesives,%20Sealants,%20and%20Tape?fsi=1&categoryId=613850
+
+Task : To extract sub-category links
+
+Writing code to check the api response of the site
+
+Test run api response to extract CategoryLevelTwo links
+
+Working on methods to extract categoryLevelThree links
+
+Successfully extracted LevelTwo links
