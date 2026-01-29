@@ -1,0 +1,6 @@
+Training Task : Extract sub-category Links
+
+site : https://www.fastenal.com/product/Adhesives,%20Sealants,%20and%20Tape?fsi=1&categoryId=613850
+
+Writing the fetch_categories tool to send ""POST"" requests 
+to the website's background system and get back lists of items.
