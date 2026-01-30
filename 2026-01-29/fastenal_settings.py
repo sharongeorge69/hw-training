@@ -43,7 +43,8 @@ HEADERS = {
 
 MONGO_URI = "mongodb://localhost:27017/"
 DB_NAME = "fastenal"
-COLLECTION_NAME = "fastenal_category"
+CATEGORY_COLLECTION_NAME = "fastenal_category"
+PRODUCT_COLLECTION_NAME = "fastenal_product_urls"
 
 ROOT_CATEGORY_ID = "613850"
 ROOT_CATEGORY_NAME = "Adhesives, Sealants, and Tape"
