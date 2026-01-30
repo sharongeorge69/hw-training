@@ -1,0 +1,13 @@
+Training task : 
+site : fastenal
+
+Completed the Category Extraction code
+
+Developed a parse_category_url tool that takes a long URL and extracts the Category ID and the names of the three different category levels
+
+Created the fetch_products function to send a "POST" request to the Fastenal system to get back a list of products.
+
+Used the update_one command with upsert to save the product details in the database, ensuring we never save the same product twice
+
+Started Feasibility study for Style Union
+
