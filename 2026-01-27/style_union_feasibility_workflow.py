@@ -1,13 +1,7 @@
 
 
 
-#=======================================
-#Settings
-#=======================================
 
-BASE_URL = "https://styleunion.in/"
-
-# Network Settings
 HEADERS = {
     "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
@@ -16,17 +10,13 @@ HEADERS = {
     "Connection": "keep-alive",
 }
 
-# Request Settings
-TIMEOUT = 20
-RETRY_COUNT = 3
-INITIAL_DELAY = 5
+
 
 
 #=======================================
 #Category Extraction
 #=======================================
 
-  def get_category_urls(self):
     response = requests.get(self.base_url, headers=self.headers)
     sel = Selector(text=response.text)
      # Xpath for Category Links
@@ -36,7 +26,6 @@ INITIAL_DELAY = 5
  #PDP url Extraction - Crawler
  #========================================
 
-def crawl_category(self, category_url):
     all_product_urls = []
     current_url = category_url
         
@@ -67,7 +56,6 @@ def crawl_category(self, category_url):
  #PDP field Extraction - parser
  #========================================
 
- def parse_product(self, url):
     response = requests.get(url, headers=self.headers, timeout=settings.TIMEOUT)
     sel = Selector(text=response.text)
     #xpaths for fields
