@@ -2,6 +2,8 @@ Training task Feasibility study of Style Union
 
 Checking whether there are blocks while testing 1000 requests(300 crawler and 700 parser)
 
+Training Task 2 : Develop parser code for Fastenal
+
 Established a connection to the final "Parsed" collection in MongoDB and created a unique index on the URL and SKU to ensure data integrity.
 
 Created a detailed mapping function to extract 10+ core fields
