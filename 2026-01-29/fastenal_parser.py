@@ -67,17 +67,16 @@ class FastenalParser:
         
         # Description
         notes = detail.get("notes", {})
-        desc_parts = []
+        raw_parts = []
         if notes.get("mp_publicNotes"):
-            desc_parts.append(self.clean_html(notes.get("mp_publicNotes")))
+            raw_parts.append(notes.get("mp_publicNotes"))
         if notes.get("mp_complianceNotes"):
-             desc_parts.append(self.clean_html(notes.get("mp_complianceNotes")))
+             raw_parts.append(notes.get("mp_complianceNotes"))
         if notes.get("mp_bulletPoints"):
-            desc_parts.append(self.clean_html(notes.get("mp_bulletPoints")))
+            raw_parts.append(notes.get("mp_bulletPoints"))
         if notes.get("mp_applicationUse"):
-            desc_parts.append(self.clean_html(notes.get("mp_applicationUse")))
-            
-        full_description = " ".join([p for p in desc_parts if p])
+            raw_parts.append(notes.get("mp_applicationUse"))
+        full_description = self.clean_html(" ".join(raw_parts))
         full_description = " ".join(full_description.split())
 
         parsed_item = {
