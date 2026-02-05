@@ -1,0 +1,11 @@
+Training task : Feasibility study of Aldi
+
+Learning Task :
+
+Web Scraping using Advanced Modules
+
+Studied Selenium to understand how it allows a script to click buttons and scroll through pages like a real human user.
+
+Compared the pros and cons of Selenium vs. Scrapy vs. Requests, noting that while Selenium is slower, it is much better at handling websites that load data as you scroll.
+
+Wrote a practice script using Webdriver in Headless Mode.
