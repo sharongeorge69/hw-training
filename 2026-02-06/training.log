@@ -1,0 +1,15 @@
+Learning Task : Web scraping advanced modules
+
+Researched Playwright as a high-performance tool for automating browsers like Chromium, Firefox, and WebKit.
+
+Learned how Playwright automatically waits for elements to appear, which makes scraping much more reliable on slow-loading websites.
+
+Studied how to use cURL to see exactly what information a browser sends to a website, such as cookies and secret headers.
+
+Researched selenium as a tool for automating browsers like Chromium, Firefox and Webkit
+
+Training task : Category url extraction using advanced web scraping modules
+
+site : https://www.aldi.us/
+
+
