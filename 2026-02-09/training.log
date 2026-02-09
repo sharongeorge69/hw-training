@@ -1,0 +1,11 @@
+Implemented a category scraper using Playwright and Selenium to handle the ALDI homepage.
+
+Practiced using Headless Mode in Playwright to run the browser in the background and Webdriver Manager in Selenium for easy setup.
+
+Implemented a category scraper using curl_cffi and cloudscraper
+
+Configured all four scrapers to connect to a local MongoDB database, using unique indexes on the URL to prevent saving the same category twice.
+
+Refined the filtering logic to specifically capture "Unique Category URLs" by excluding individual product pages and keeping only the /products/ paths.
+
+
