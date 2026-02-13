@@ -17,26 +17,45 @@ headers = {
     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36',
 }
 
-
-
-
-
-
-
-
 #######################PARSER#######################
 
-url = "https://www.jcpenney.com/p/stafford-big-and-tall-coolmax-all-season-oxford-mens-button-down-collar-long-sleeve-stretch-fabric-wrinkle-free-dress-shirt/ppr5008282312?pTmplType=regular"
+url = "https://www.jcpenney.com/p/adidas-tricot-mens-big-and-tall-lightweight-track-jacket/ppr5008524658?pTmplType=regular"
 response = requests.get(url, headers=headers)
 selector = Selector(text=response.text)
 
 productname = selector.xpath('//h1[@data-automation-id="product-title"]/text()').getall()
-cleaned_productname = "".join(productname).strip()
 
 brand = selector.xpath('//p[@data-automation-id="at-brand-link-block"]//a[@data-automation-id="at-brand-link-btn"]//text()').get()
-cleaned_brand = "".join(brand).strip()
-print(brand)
 
+with sync_playwright() as p:
+        browser = p.firefox.launch(headless=True) # use firefox
+        context = browser.new_context(
+            user_agent='Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/144.0.0.0 Safari/537.36'
+        )
+        page = context.new_page()
+        unique_id = re.search(r'ppr\d+', url)
+        product_name= page.locator('h1[data-automation-id="product-title"]').inner_text().strip()
+        brand = page.locator('[data-automation-id="at-brand-link-btn"]').inner_text().strip()
+        desc= page.locator('[id="productDescriptionContainer"]')
+        description = desc.inner_text().strip()
+        image_url= page.locator('img[data-automation-id="ProductImageZoom"]')
+        image = image_url.first.get_attribute('src')
+
+
+        content = page.content()
+        sel = Selector(text=content)
+        selling_price = sel.xpath('//span[@data-automation-id="at-price-value"]/text()').get()
+        regular_price = sel.xpath('//span[@data-automation-id="price-original-price"]/text()').get()
+        discount = sel.xpath('//span[@data-automation-id="price-percent-off"]/text()').get()
+        color_text = sel.xpath('string(//div[@data-automation-id="color"])').get()
+
+
+            
+
+        
+
+
+        
 
 
 
