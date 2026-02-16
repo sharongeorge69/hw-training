@@ -1,0 +1,12 @@
+Researched common security obstacles like IP blocking and Header-based identification
+
+tudied Crawling pattern detection to simulate human-like browsing speeds and explored Captcha verification and JavaScript Validation.
+
+Evaluated premium anti-bot services such as PerimeterX, Distil Networks, and reCAPTCHA to understand how they use behavioral biometrics to identify automated scripts.
+
+Developed a multi-level crawler to extract main category URLs from the JCPenney sitemap, ensuring all relevant departments were accurately captured.
+
+Implemented logic to automatically convert relative paths into absolute "https" addresses and integrated the results into MongoDB for persistent storage.
+
+
+
