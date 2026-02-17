@@ -1,0 +1,8 @@
+nitiated the development of a product-level crawler designed to navigate through JCPenney’s department pages and collect individual product details.
+
+Researched and implemented advanced strategies to overcome the "pagination cap" (limit on the number of pages displayed) to ensure the crawler can reach all products in deep categories.
+
+Refined the crawling logic to bypass page-load restrictions by utilizing secondary filters and sorting methods to access products hidden beyond the standard page limits.
+
+
+
