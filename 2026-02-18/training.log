@@ -1,0 +1,11 @@
+Engineered a robust crawling mechanism to bypass JCPenney’s 1,200-product display limit by applying automated price range filters (facets) to access deep-catalog product URLs.
+
+Authored a specialized parser using Regex and JSON to extract structured product data from the __PRELOADED_STATE__ object embedded within the site's HTML.
+
+Wrote logic to extract required product fields.
+
+Integrated a secondary method to fetch real-time financial data—including selling price, regular price, and discount percentages—by calling the JCPenney product-aggregator API.
+
+Finalizing Code and System Testing: Completed the full-cycle script, incorporating a CSV Exporter with data cleaning logic, and performed end-to-end testing to ensure data integrity across the MongoDB collection.
+
+
