@@ -3,7 +3,7 @@ import math
 import logging
 import jcpenney_settings as settings
 from urllib.parse import urljoin
-from mongoengine import connect, DynamicDocument, StringField
+from mongoengine import connect, DynamicDocument
 from jcpenney_items import ProductUrlItem
 
 logging.basicConfig(
@@ -44,7 +44,7 @@ class Crawler:
             if not isinstance(facets, list):
                 facets = facets.get("facetList", [])
                 
-            priority_facets = ["Price Range", "Item Type", "Brand"]
+            priority_facets = ["Price Range", "Style", "Brand", "Stone"]
             found_facets = False
             
             for f_name in priority_facets:
@@ -96,7 +96,7 @@ class Crawler:
             p_url = urljoin("https://www.jcpenney.com", suffix)
             cat_obj = {"url": cat_url, "name": cat_name}
             
-            # Use MongoEngine for atomic update (addToSet for categories)
+            # MongoEngine for atomic update (addToSet for categories)
             ProductUrlItem.objects(product_url=p_url).update_one(
                 set__name=p.get('name'),
                 add_to_set__categories=cat_obj,
