@@ -1,0 +1,9 @@
+Researched the fundamental role of proxy servers in web scraping, focusing on how to route traffic through intermediary nodes to hide the scraper's direct connection.
+
+Successfully implemented and verified Proxy Authentication within the requests library, ensuring that encrypted credentials (username/password) are correctly passed to residential and datacenter proxies.
+
+Explored Webscraper.io
+
+Developed techniques to identify enterprise-level bot protection services (such as Cloudflare, PerimeterX, and DataDome) by analyzing HTTP response headers, cookie names (e.g., _px, datadome), and JavaScript challenge triggers.
+
+
