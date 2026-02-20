@@ -1,0 +1,11 @@
+Researched MongoEngine as an Object-Document Mapper (ODM) for Python, focusing on how to define structured schemas and simplify complex MongoDB interactions.
+
+Initiated a technical analysis of the "Reelly" platform to identify how the site manages user authentication and protects its internal data layers.
+
+Conducted a deep dive into the Reelly site to map out the user journey and pinpoint the specific triggers required to unlock data after logging in.
+
+Analyzed the network traffic of the Reelly platform to figure out if data is loaded via dynamic JavaScript or hidden internal API calls.
+
+Tested various API endpoints discovered during the analysis phase and began writing the core crawler code to automate data extraction.
+
+
