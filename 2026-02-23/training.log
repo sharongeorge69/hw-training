@@ -1,0 +1,16 @@
+Conducted a comparative study on the execution speeds and overhead of various Python client libraries, including Requests, HTTPX, and curl_cffi.
+
+Extracted sample data using webscraper.io
+
+Participated in a daily meeting to discuss the technical viability of new scraping targets, assessing site architecture and potential security roadblocks.
+
+Attended a team meeting to discuss best practices for using the WebScraper.io extension to speed up the initial data discovery phase for complex sites.
+
+Engaged in a strategic meeting to finalize the feasibility study results, ensuring the proposed scraping logic aligns with project requirements and data integrity standards.
+
+Successfully extracted a sample dataset from Dubizzle using WebScraper.io to validate the accuracy of the selectors and ensure the scraper could navigate the site's dynamic product listings.
+
+Participated in a code review session to evaluate script efficiency.
+
+Created a comprehensive Quality Assurance checklist for the JCPenney project.
+
