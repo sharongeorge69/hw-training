@@ -50,6 +50,10 @@ def export_to_csv():
     except Exception as e:
         logger.error(f"Export failed: {e}")
         return None
+    finally:
+        if 'client' in locals() and client:
+            client.close()
+            logger.info("MongoDB connection closed.")
 
 if __name__ == "__main__":
     export_to_csv()
