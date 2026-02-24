@@ -1,6 +1,5 @@
 import requests
 import logging
-from mongoengine import connect
 from pymongo import MongoClient
 import reelly_settings as settings
 from reelly_items import ProductUrlItem
@@ -14,9 +13,6 @@ logger = logging.getLogger(__name__)
 
 class ReellyApiCrawler:
     def __init__(self):
-        # MongoEngine connection for models
-        connect(settings.MONGO_DB, host=settings.MONGO_URI)
-        
         # PyMongo connection for direct insertion
         self.client = MongoClient(settings.MONGO_URI)
         self.db = self.client[settings.MONGO_DB]
