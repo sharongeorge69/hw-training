@@ -4,7 +4,7 @@ import re
 import time
 from pymongo import MongoClient
 import reelly_settings as settings
-import reelly_items
+# import reelly_items
 
 # Configure Logging
 logging.basicConfig(
@@ -94,8 +94,8 @@ class ReellyParser:
         }
         try:
             # Create instance and validate
-            product_item = reelly_items.ProductItem(**item)
-            product_item.validate()
+            # product_item = reelly_items.ProductItem(**item)
+            # product_item.validate()
             
             self.collection.insert_one(item)
         except Exception as e:
