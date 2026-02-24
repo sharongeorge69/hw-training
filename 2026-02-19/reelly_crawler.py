@@ -2,7 +2,7 @@ import requests
 import logging
 from pymongo import MongoClient
 import reelly_settings as settings
-from reelly_items import ProductUrlItem
+# from reelly_items import ProductUrlItem
 
 # Configure Logging
 logging.basicConfig(
@@ -54,8 +54,8 @@ class ReellyApiCrawler:
                     
                     try:
                         # Create instance and validate
-                        product_item = ProductUrlItem(**item)
-                        product_item.validate()
+                        # product_item = ProductUrlItem(**item)
+                        # product_item.validate()
                         
                         self.collection.insert_one(item)
                         total_saved += 1
