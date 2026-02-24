@@ -2,7 +2,6 @@ import requests
 import logging
 import re
 import time
-from mongoengine import connect
 from pymongo import MongoClient
 import reelly_settings as settings
 import reelly_items
@@ -16,13 +15,11 @@ logger = logging.getLogger(__name__)
 
 class ReellyParser:
     def __init__(self):
-        # MongoEngine connection for models
-        connect(settings.MONGO_DB, host=settings.MONGO_URI)
-        
         # PyMongo connection for direct insertion
         self.client = MongoClient(settings.MONGO_URI)
         self.db = self.client[settings.MONGO_DB]
         self.collection = self.db[settings.MONGO_COLLECTION_DATA]
+        self.url_collection = self.db[settings.MONGO_COLLECTION_RESPONSE]
         
         logger.info(f"Connected to MongoDB: {settings.MONGO_DB}")
         self.detail_base_url = "https://api-reelly.up.railway.app/api/internal/projects/"
@@ -104,15 +101,17 @@ class ReellyParser:
         except Exception as e:
             logger.error(f"Error saving project {item.get('project_id')}: {e}")
 
-    def run(self):
-        # Get all discovered project IDs via model
-        project_urls = reelly_items.ProductUrlItem.objects.all()
-        total = project_urls.count()
+    def start(self):
+        # Get all discovered project IDs via PyMongo
+        total = self.url_collection.count_documents({"project_id": {"$exists": True}})
+        project_urls = self.url_collection.find({"project_id": {"$exists": True}})
         logger.info(f"Found {total} project IDs to parse.")
 
         count = 0
         for p_url in project_urls:
-            p_id = p_url.project_id
+            p_id = p_url.get("project_id")
+            if not p_id:
+                continue
             count += 1
             
             logger.info(f"Progress: {count}/{total} projects parsed (Project ID: {p_id})...")
@@ -125,6 +124,15 @@ class ReellyParser:
 
         logger.info("Parsing complete.")
 
+    def close(self):
+        try:
+            if hasattr(self, 'client') and self.client:
+                self.client.close()
+                logger.info("MongoDB connection closed.")
+        except Exception as e:
+            logger.error(f"Error closing MongoDB connection: {e}")
+
 if __name__ == "__main__":
     parser = ReellyParser()
-    parser.run()
+    parser.start()
+    parser.close()
