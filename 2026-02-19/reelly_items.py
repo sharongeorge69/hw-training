@@ -1,3 +1,4 @@
+from mongoengine import FloatField
 from mongoengine import Document, DynamicDocument, StringField, IntField
 import reelly_settings as settings
 
@@ -5,7 +6,7 @@ class ProductUrlItem(DynamicDocument):
    #Collection for discovered project URLs/IDs
     meta = {
         "db_alias": "default",
-        "collection": settings.MONGO_COLLECTION_URLS
+        "collection": settings.MONGO_COLLECTION_RESPONSE
     }
     
     project_id = IntField(required=True, unique=True)
@@ -19,7 +20,7 @@ class ProductItem(Document):
     """
     meta = {
         "db_alias": "default",
-        "collection": settings.MONGO_COLLECTION_PRODUCTS,
+        "collection": settings.MONGO_COLLECTION_DATA,
         "strict": False 
     }
 
@@ -35,7 +36,7 @@ class ProductItem(Document):
     service_charge = StringField()
     resale_conditions = StringField()
     unit_types = StringField()
-    price_from = IntField()
+    price_from = FloatField()
     district = StringField()
     cover_image_url = StringField()
     floors = StringField()
