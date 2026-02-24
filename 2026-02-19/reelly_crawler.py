@@ -20,7 +20,7 @@ class ReellyApiCrawler:
         
         logger.info(f"Connected to MongoDB: {settings.MONGO_DB}")
 
-    def run(self):
+    def start(self):
         logger.info("Starting API-based project extraction...")
         params = {
             'limit': 2000
@@ -67,6 +67,15 @@ class ReellyApiCrawler:
         except Exception as e:
             logger.error(f"API Crawler failed: {e}")
 
+    def close(self):
+        try:
+            if hasattr(self, 'client') and self.client:
+                self.client.close()
+                logger.info("MongoDB connection closed.")
+        except Exception as e:
+            logger.error(f"Error closing MongoDB connection: {e}")
+
 if __name__ == "__main__":
     crawler = ReellyApiCrawler()
-    crawler.run()
+    crawler.start()
+    crawler.close()
