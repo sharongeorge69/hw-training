@@ -22,7 +22,7 @@ class ReellyParser:
         # PyMongo connection for direct insertion
         self.client = MongoClient(settings.MONGO_URI)
         self.db = self.client[settings.MONGO_DB]
-        self.collection = self.db[settings.MONGO_COLLECTION_PRODUCTS]
+        self.collection = self.db[settings.MONGO_COLLECTION_DATA]
         
         logger.info(f"Connected to MongoDB: {settings.MONGO_DB}")
         self.detail_base_url = "https://api-reelly.up.railway.app/api/internal/projects/"
@@ -89,25 +89,18 @@ class ReellyParser:
             "service_charge": self.sanitize(data.get('service_charge')),
             "resale_conditions": self.sanitize(data.get('resale_conditions')),
             "unit_types": self.sanitize(data.get('unit_types')),
-            "price_from": data.get('min_price') if data.get('min_price') is not None else 0,
+            "price_from": float(data.get('min_price')) if data.get('min_price') is not None else 0,
             "district": self.sanitize(data.get('district')),
             "cover_image_url": cover_image_url,
             "floors": self.sanitize(data.get('floors')),
             "url": f"https://find.reelly.io/projects/{p_id}"
         }
-        return item
-
-    def save_item(self, item):
         try:
             # Create instance and validate
             product_item = reelly_items.ProductItem(**item)
             product_item.validate()
             
-            self.collection.update_one(
-                {"project_id": item["project_id"]},
-                {"$set": item},
-                upsert=True
-            )
+            self.collection.insert_one(item)
         except Exception as e:
             logger.error(f"Error saving project {item.get('project_id')}: {e}")
 
@@ -122,14 +115,11 @@ class ReellyParser:
             p_id = p_url.project_id
             count += 1
             
-            if count % 50 == 0 or count == total:
-                logger.info(f"Progress: {count}/{total} projects parsed...")
+            logger.info(f"Progress: {count}/{total} projects parsed (Project ID: {p_id})...")
 
             data = self.fetch_project_details(p_id)
             if data:
-                item = self.parse_item(data)
-                if item:
-                    self.save_item(item)
+                self.parse_item(data)
             
             time.sleep(0.1)
 
