@@ -20,7 +20,7 @@ class ReellyApiCrawler:
         # PyMongo connection for direct insertion
         self.client = MongoClient(settings.MONGO_URI)
         self.db = self.client[settings.MONGO_DB]
-        self.collection = self.db[settings.MONGO_COLLECTION_URLS]
+        self.collection = self.db[settings.MONGO_COLLECTION_RESPONSE]
         
         logger.info(f"Connected to MongoDB: {settings.MONGO_DB}")
 
@@ -61,11 +61,7 @@ class ReellyApiCrawler:
                         product_item = ProductUrlItem(**item)
                         product_item.validate()
                         
-                        self.collection.update_one(
-                            {"project_id": item["project_id"]},
-                            {"$set": item},
-                            upsert=True
-                        )
+                        self.collection.insert_one(item)
                         total_saved += 1
                     except Exception as e:
                         logger.error(f"Error saving URL for project {p_id}: {e}")
