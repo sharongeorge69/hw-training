@@ -7,9 +7,9 @@ API_URL = "https://api-reelly.up.railway.app/api/internal/projects"
 
 # Mongo DB and Collections
 MONGO_DB = "reelly_db"
-MONGO_URI = "mongodb://localhost:27017/"
-MONGO_COLLECTION_URLS = f"{PROJECT_NAME}_url"
-MONGO_COLLECTION_PRODUCTS = f"{PROJECT_NAME}_products"
+MONGO_URI = "mongodb://mongotraining:a4892e52373844dc4862e6c468d11b6df7938e16@209.97.183.63:27017/?authSource=admin"
+MONGO_COLLECTION_RESPONSE = f"{PROJECT_NAME}_url"
+MONGO_COLLECTION_DATA = f"{PROJECT_NAME}_data"
 
 # Export Settings
 FILE_NAME_FULLDUMP = f"{PROJECT_NAME}_export_{datetime.now().strftime('%Y%m%d')}.csv"
