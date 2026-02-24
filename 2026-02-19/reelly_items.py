@@ -1,5 +1,4 @@
-from mongoengine import FloatField
-from mongoengine import Document, DynamicDocument, StringField, IntField
+from mongoengine import Document, DynamicDocument, StringField, IntField, FloatField
 import reelly_settings as settings
 
 class ProductUrlItem(DynamicDocument):
