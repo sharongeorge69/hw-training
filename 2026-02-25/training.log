@@ -1,0 +1,9 @@
+Researched techniques to bypass TLS Fingerprinting.
+
+Commenced a comprehensive feasibility study for the JioMart platform, analyzing the site’s HTML structure and network traffic to determine the most efficient extraction method.
+
+Conducted a block-checking analysis on JioMart to identify rate-limiting thresholds and designed a specialized scraping workflow to handle the site's category-to-product hierarchy.
+
+Tested and verified internal API endpoints for JioMart to extract real-time pricing and stock availability, successfully concluding the feasibility study with a finalized technical plan.
+
+
