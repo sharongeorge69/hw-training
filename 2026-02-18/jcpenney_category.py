@@ -2,8 +2,9 @@ import requests
 from parsel import Selector
 from urllib.parse import urlparse, parse_qs
 import logging
-import jcpenney_settings as settings
-from mongoengine import connect, DynamicDocument
+import settings
+import pymongo
+from items import CategoryItem
 
 logging.basicConfig(
     level=logging.INFO,
@@ -11,16 +12,23 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-class CategoryDoc(DynamicDocument):
-    meta = {
-        'collection': settings.MONGO_COLLECTION_CATEGORY,
-        'indexes': [{'fields': ['url'], 'unique': True}]
-    }
-
+#Category Sitemap
 class CategorySitemap:
     def __init__(self):
-        connect(settings.MONGO_DB, host=settings.MONGO_URI)
         self.headers = settings.HEADERS
+        
+        #mongodb connection
+        self.mongo_uri = settings.MONGO_URI
+        self.db_name = settings.MONGO_DB
+        self.collection_name = settings.MONGO_COLLECTION_CATEGORY
+        try:
+            self.client = pymongo.MongoClient(self.mongo_uri)
+            self.db = self.client[self.db_name]
+            self.collection = self.db[self.collection_name]
+            self.collection.create_index("url", unique=True)
+            logger.info("Connected to MongoDB")
+        except Exception as e:
+            logger.error(f"MongoDB connection error: {e}")
         
     def start(self):
         try:
@@ -29,7 +37,7 @@ class CategorySitemap:
             self.parse_sitemap(resp.text)
         except Exception as e:
             logger.error(f"Sitemap error: {e}")
-
+    #Parse Sitemap
     def parse_sitemap(self, html_content):
         selector = Selector(text=html_content)
         linkfarms = {
@@ -49,7 +57,7 @@ class CategorySitemap:
                 url = f"https://www.jcpenney.com{href}"
                 logger.info(f"Main Category: {label}")
                 self.fetch_subcategories(url, label, linkfarms[label])
-
+    #Fetch Subcategories
     def fetch_subcategories(self, url, main_cat, linkfarm_ids):
         try:
             resp = requests.get(url, headers=self.headers, timeout=10)
@@ -67,22 +75,32 @@ class CategorySitemap:
                         logger.info(f"  Subcategory Found: {name.strip()}")
         except Exception as e:
             logger.error(f"Error fetching subcategories for {main_cat}: {e}")
-
+    #Save Category
     def save_category(self, url, main_cat, sub_cat):
         try:
             parsed = urlparse(url)
             cat_id = parse_qs(parsed.query).get("id", [None])[0]
-            api_url = f"https://search-api.jcpenney.com/v1/search-service{parsed.path}?id={cat_id}&responseType=organic" if cat_id else None
+            api_url = f"https://search-api.jcpenney.com/v1/search-service{parsed.path}?id={cat_id}&responseType=organic" if cat_id else ""
 
-            CategoryDoc.objects(url=url).update_one(
-                set__main_category_name=main_cat,
-                set__subcategory_name=sub_cat,
-                set__category_id=cat_id,
-                set__api_url=api_url,
-                upsert=True
-            )
+            item = {
+                "url": str(url),
+                "main_category_name": str(main_cat) if main_cat else "",
+                "subcategory_name": str(sub_cat) if sub_cat else "",
+                "category_id": str(cat_id) if cat_id else "",
+                "api_url": str(api_url) if api_url else ""
+            }
+            try:
+                category_item = CategoryItem(**item)
+                category_item.validate()
+                self.collection.update_one(
+                    {"url": url},
+                    {"$set": item},
+                    upsert=True
+                )
+            except Exception as e:
+                logger.error(f"Save error: {e}")
         except Exception as e:
-            logger.error(f"Save error for {url}: {e}")
+            logger.error(f"Error parsing category {url}: {e}")
 
 if __name__ == "__main__":
     CategorySitemap().start()

@@ -1,12 +1,11 @@
 import csv
 import re
 from html import unescape
-from mongoengine import connect
 from pymongo import MongoClient
-import jcpenney_settings as settings
+import settings
 
 csv_headers = [
-    "unique_id", "url", "product_name", "brand", "selling_price",
+    "unique_id", "url", "productname", "brand", "selling_price",
     "regular_price", "discount", "description", "specification",
     "fit_type", "image", "rating", "review", "size", "colour"
 ]
@@ -19,7 +18,7 @@ class Exporter:
 
     def start(self):
         self.writer.writerow(csv_headers)
-        for item in self.collection.find():
+        for item in self.collection.find().limit(200):
             row = []
             for h in csv_headers:
                 val = item.get(h, "")
@@ -32,6 +31,17 @@ class Exporter:
                 if h in ["selling_price", "regular_price"] and val:
                     try: val = format(float(val), ".2f")
                     except: pass
+                
+                if h in ["rating", "review"]:
+                    try:
+                        f_val = float(val)
+                        if f_val == 0:
+                            val = ""
+                        elif h == "rating":
+                            val = str(round(f_val, 1))
+                    except (ValueError, TypeError):
+                        pass
+
                 row.append(val)
             self.writer.writerow(row)
 

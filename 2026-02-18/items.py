@@ -1,5 +1,5 @@
-from mongoengine import Document, DynamicDocument, StringField, ListField
-import jcpenney_settings as settings
+from mongoengine import Document, DynamicDocument, StringField, ListField, FloatField
+import settings
 
 class ProductItem(Document):
     """
@@ -13,10 +13,10 @@ class ProductItem(Document):
     # Define common fields to ensure types
     unique_id = StringField()
     url = StringField(unique=True)
-    product_name = StringField()
+    productname = StringField()
     brand = StringField()
-    selling_price = StringField()
-    regular_price = StringField()
+    selling_price = FloatField()
+    regular_price = FloatField()
     discount = StringField()
     description = StringField()
     specification = StringField()
@@ -38,3 +38,18 @@ class ProductUrlItem(DynamicDocument):
     
     product_url = StringField(unique=True)
     categories = ListField() # List of category objects/names
+
+class CategoryItem(Document):
+    """
+    JCPenney Category Item following MongoEngine DynamicDocument structure
+    """
+    meta = {
+        "db_alias": "default",
+        "collection": settings.MONGO_COLLECTION_CATEGORY
+    }
+
+    url = StringField(unique=True)
+    main_category_name = StringField()
+    subcategory_name = StringField()
+    category_id = StringField()
+    api_url = StringField()

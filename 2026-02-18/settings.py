@@ -11,12 +11,12 @@ MONGO_COLLECTION_CATEGORY = f"{PROJECT_NAME}_category_url"
 MONGO_COLLECTION_CATEGORY_NO_PRICE = f"{PROJECT_NAME}_category_url_no_price"
 MONGO_COLLECTION_RESPONSE = f"{PROJECT_NAME}_url"
 MONGO_COLLECTION_SAMPLE = f"{PROJECT_NAME}_sample"
-MONGO_COLLECTION_PRODUCTS = f"{PROJECT_NAME}_products"
+MONGO_COLLECTION_PRODUCTS = f"{PROJECT_NAME}_data"
 MONGO_URI = "mongodb://localhost:27017/"
 
 # Export settings
 from datetime import datetime
-FILE_NAME_FULLDUMP = f"{PROJECT_NAME}_export_{datetime.now().strftime('%Y%m%d')}.csv"
+FILE_NAME_FULLDUMP = f"{PROJECT_NAME}_{datetime.now().strftime('%Y_%m_%d')}_{'sample'}.csv"
 EXTRACTION_DATE = datetime.now().strftime('%Y-%m-%d')
 
 
