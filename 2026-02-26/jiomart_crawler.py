@@ -1,6 +1,6 @@
 from curl_cffi import requests
 import logging
-import settings
+from setting import headers, json_data, CRAWLER_URL, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE
 import pymongo
 from items import ProductUrlItem
 import re
@@ -14,20 +14,20 @@ logger = logging.getLogger(__name__)
 
 class Crawler:
     def __init__(self):
-        self.url = settings.CRAWLER_URL
-        self.headers = settings.headers
-        self.payload = settings.json_data
+        self.url = CRAWLER_URL
+        self.headers = headers
+        self.payload = json_data
         
         # mongodb connection
-        self.mongo_uri = settings.MONGO_URI
-        self.db_name = settings.MONGO_DB
-        self.collection_name = settings.MONGO_COLLECTION_RESPONSE
+        self.mongo_uri = MONGO_URI
+        self.db_name = MONGO_DB
+        self.collection_name = MONGO_COLLECTION_RESPONSE
         try:
             self.client = pymongo.MongoClient(self.mongo_uri)
             self.db = self.client[self.db_name]
             self.collection = self.db[self.collection_name]
             self.collection.create_index("unique_id", unique=True)
-            logger.info("Connected to MongoDB & ensured unique index on unique_id")
+            logger.info("Connected to MongoDB")
         except Exception as e:
             logger.error(f"MongoDB connection error: {e}")
 
