@@ -1,0 +1,9 @@
+Studied the fundamentals of the Vim text editor, focusing on efficient file navigation, command-line editing modes, and essential shortcuts to accelerate terminal-based code development.
+
+Initiated the development of the JioMart Crawler, establishing the project architecture, request sessions, and foundational logic.
+
+Validated the identified JioMart API endpoints, testing request headers and payloads to ensure consistent retrieval of product and pricing data.
+
+Finalized the crawler codebase, optimized internal error-handling routines, and successfully deployed the script to the remote server to initiate live data extraction.
+
+Commenced the development of the JioMart Parser.
