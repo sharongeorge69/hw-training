@@ -1,0 +1,11 @@
+Commenced development of the parsing layer for the JioMart project, focused on mapping raw JSON API responses into structured, database-ready product attributes.
+
+Investigated and verified the JioMart "Price" API endpoint, ensuring accurate retrieval and cleaning of base prices, promotional discounts, and currency formatting.
+
+Validated the "Rating and Review" API endpoints, ensuring reliable mapping of aggregate customer ratings and review volumes to each product record.
+
+Refined and finalized the parser codebase, implementing comprehensive error handling to manage schema variations and ensure consistent data integrity.
+
+Executed a sample data export from the JioMart database, confirming that the output format and data quality align with project schema requirements.
+
+
