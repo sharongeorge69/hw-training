@@ -271,19 +271,8 @@ class Parser:
             
             # Validation logic
             try:
-                # Prepare data for validation (mongoengine expects Float for some fields)
-                validation_data = items.copy()
-                for field in ["regular_price", "selling_price", "price_was", "percentage_discount"]:
-                    if validation_data.get(field):
-                        try:
-                            validation_data[field] = float(validation_data[field])
-                        except:
-                            validation_data[field] = None
-                    else:
-                        validation_data[field] = None
-                
                 # Instantiate and validate
-                product_item = ProductDataItem(**validation_data)
+                product_item = ProductDataItem(**items)
                 product_item.validate()
                 
                 # Save to MongoDB
