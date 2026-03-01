@@ -173,8 +173,6 @@ class Parser:
                             if not txcf_data:
                                 # Fallback to any region that has pricing data
                                 txcf_data = next((entry for entry in buybox_mrp if "|" in entry and len(entry.split("|")) > 5), None)
-                                # if txcf_data:
-                                #     logger.info(f"Fallback pricing tag used for {unique_id}: {txcf_data.split('|')[0]}")
                             
                             if txcf_data:
                                 parts = txcf_data.split("|")
