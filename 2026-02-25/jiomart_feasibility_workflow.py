@@ -67,16 +67,56 @@ storage_instructions = sel.xpath('//tr[th[contains(text(), "Storage Category")]]
 instructionforuse = sel.xpath('//tr[th[contains(text(), "How To Use")]]/td/text()').get()
 country_of_origin = sel.xpath('//tr[th[contains(text(), "Country of Origin")]]/td/text()').get()
 manufacturer_address = sel.xpath('//tr[th[contains(text(), "Manufacturer Address")]]/td/text()').get()
+product_unique_key = f"{unique_id}P"
+img_urls = sel.xpath(
+"//div[contains(@class,'product-image-carousel-thumb')]"
+"//div[contains(@class,'swiper-thumb-slides')]//img/@data-src | "
+"//div[contains(@class,'product-image-carousel-thumb')]"
+"//div[contains(@class,'swiper-thumb-slides')]//img/@src"
+).extract()
+
+height = sel.xpath('//tr[th[contains(text(), "Height")]]/td/text()').extract_first()
+length = sel.xpath('//tr[th[contains(text(), "Length")]]/td/text()').extract_first()
+width = sel.xpath('//tr[th[contains(text(), "Width")]]/td/text()').extract_first()
+
+dimensions = ""
+if length and width and height:
+    dimensions = f"{length}X{width}X{height}"
 
 #additional request for selling_price, regular_price, discount
 
-response = requests.get('https://www.jiomart.com/catalog/productdetails/get/490001816', cookies=cookies, headers=headers)
+url = "https://www.jiomart.com/trex/search"
+payload = json_data.copy()
+payload['filter'] = f'attributes.product_id:ANY("{unique_id}")'
+payload['pageSize'] = 1
+response = requests.post(url, cookies=cookies, headers=headers, json=payload, timeout=15, impersonate="chrome110")
 
-pd = response.json()
-result = pd.get("data")
-regular_price = result["mrp"]
-selling_price = result["selling_price"]
-discount = result["discount_pct"]
+data = response.json()
+results = data.get("results", [])
+product = results[0].get("product", {})
+variants = product.get("variants", [])
+variant = variants[0]
+attributes = variant.get("attributes", {})
+buybox_mrp = attributes.get("buybox_mrp", {}).get("text", [])
+gtm_details = variant.get("gtm_details", {})
+txcf_data = next((entry for entry in buybox_mrp if entry.startswith("TXCF|")), None)
+regular_price = parts[4]
+selling_price = parts[5]
+percentage_discount = parts[8] if len(parts) > 8 else ""
+
+#additional request for rating and review
+
+rating_headers = {
+            'vertical': 'jiomart',
+            'accept': 'application/json',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
+        }
+rating_url = f"https://reviews-ratings.jio.com/customer/op/v1/review/product-statistics/{alternate_id/unique_id}"
+rating_resp = requests.get(rating_url, headers=rating_headers, timeout=10)
+details = rating_resp.json()
+data = details.get("data", {})
+rating = data.get("averageRating", "")
+review = data.get("ratingsCount", "")
 
 #############findings##############
 
