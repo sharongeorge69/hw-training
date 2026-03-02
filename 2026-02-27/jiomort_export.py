@@ -1,5 +1,6 @@
 import csv
 import logging
+import re
 from pymongo import MongoClient
 from settings import MONGO_URI, MONGO_DB, MONGO_COLLECTION_DATA, FILE_NAME_FULLDUMP
 
@@ -74,7 +75,7 @@ csv_headers = [
   "chilled",
   "organictype",
   "cooking_part",
-  "Handmade",
+  "handmade",
   "max_heating_temperature",
   "special_information",
   "label_information",
@@ -134,7 +135,7 @@ csv_headers = [
   "multibuy_items_pricesingle",
   "perfect_match",
   "servings_per_pack",
-  "Warning",
+  "warning",
   "suitable_for",
   "standard_drinks",
   "environmental",
@@ -157,19 +158,43 @@ def export_data():
         logger.info(f"Total documents available: {total_docs}. Exporting up to: {export_count}")
         
         with open(FILE_NAME_FULLDUMP, 'w', newline='', encoding='utf-8') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=csv_headers, extrasaction='ignore')
+            writer = csv.DictWriter(csvfile, fieldnames=csv_headers, extrasaction='ignore', delimiter='|', quoting=csv.QUOTE_ALL)
+        #     with open("filename.csv", "w", encoding="utf-8", newline="") as success_file:
+        # writer_file = csv.writer(success_file, delimiter="|", quotechar='"')
+        # export = Export(writer_file)
             writer.writeheader()
             
             count = 0
             for doc in cursor:
-                # Format row strictly matching headers. Missed headers handle as empty strings.
-                # Strip leading/trailing spaces from every field
+
                 row = {}
                 for header in csv_headers:
                     val = doc.get(header, "")
                     if val is None:
                         val = ""
-                    row[header] = str(val).strip()
+                    
+                    val_str = str(val).strip()
+                    
+                    # Clean the product description
+                    if header == "product_description":
+                        # Replace \xa0 with space, remove newlines, collapse multiple spaces, remove zero-width space
+                        val_str = val_str.replace('\xa0', ' ').replace('\u200b', '')
+                        val_str = re.sub(r'[\r\n]+', ' ', val_str)
+                        val_str = re.sub(r'\s{2,}', ' ', val_str).strip()
+                        
+                        # Remove Disclaimer text
+                        val_str = re.sub(r'Disclaimer\s*:.*', '', val_str, flags=re.IGNORECASE).strip()
+                        
+                        # Empty string if it's just responsive image placeholders
+                        unwanted_phrases = ["Responsive A+ Content", "Responsive Image Display", "Responsive Images"]
+                        if any(phrase in val_str for phrase in unwanted_phrases):
+                            val_str = ""
+                    
+                    # Remove query parameters from image URLs
+                    if header.startswith("image_url_") and "?" in val_str:
+                        val_str = val_str.split("?")[0]
+                        
+                    row[header] = val_str
                 writer.writerow(row)
                 
                 count += 1
