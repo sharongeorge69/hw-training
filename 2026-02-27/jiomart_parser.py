@@ -28,6 +28,10 @@ class Parser:
             self.db = self.client[self.db_name]
             self.url_collection = self.db[self.collection_name]
             self.product_collection = self.db[self.product_collection_name]
+            
+            # Create a unique index for unique_id
+            self.product_collection.create_index("unique_id", unique=True)
+            
             logger.info("Connected to MongoDB")
         except Exception as e:
             logger.error(f"MongoDB connection error: {e}")
@@ -107,7 +111,10 @@ class Parser:
             breadcrumb_list = sel.xpath('//ul[@class="jm-breadcrumbs-list"]//a/text()').extract()
             breadcrumb = " > ".join(breadcrumb_list) if breadcrumb_list else ""
             
-            product_description = sel.xpath("//div[@id='pdp_description']//text()[normalize-space()]").extract_first()
+            desc_nodes = sel.xpath(
+                "//div[@id='pdp_description']//text()[not(ancestor::button) and not(ancestor::style) and not(ancestor::script)]"
+            ).extract()
+            product_description = " ".join(t.strip() for t in desc_nodes if t.strip())
             storage_instructions = sel.xpath('//tr[th[contains(text(), "Storage Category")]]/td/text()').extract_first()
             instructionforuse = sel.xpath('//tr[th[contains(text(), "How To Use")]]/td/text()').extract_first()
             country_of_origin = sel.xpath('//tr[th[contains(text(), "Country of Origin")]]/td/text()').extract_first()
@@ -165,9 +172,6 @@ class Parser:
                             variant = variants[0]
                             attributes = variant.get("attributes", {})
                             buybox_mrp = attributes.get("buybox_mrp", {}).get("text", [])
-                            gtm_details = variant.get("gtm_details", {})
-                            alternate_id = gtm_details.get("alternate_id", "")
-                            
                             # Search for TXCF in buybox_mrp
                             txcf_data = next((entry for entry in buybox_mrp if entry.startswith("TXCF|")), None)
                             if not txcf_data:
@@ -200,10 +204,9 @@ class Parser:
                 logger.error(f"Pricing API error for {unique_id}: {e}")
 
             # Extract alternate_id from HTML for Rating API
-            alternate_id_match = re.search(r'data-alternate="([^"]+)"', response.text)
-            alternate_id = alternate_id_match.group(1) if alternate_id_match else ""
+            alternate_id = sel.xpath('//div[@id="crfe_widget"]/@data-product-id').get()
             
-            # If not found in data-alternate, look in gtmEvents data-id (unique_id often matches)
+            # If not found in crfe_widget, look in gtmEvents data-id (unique_id often matches)
             if not alternate_id:
                 alternate_id = unique_id
 
