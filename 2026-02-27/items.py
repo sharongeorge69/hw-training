@@ -28,7 +28,7 @@ class ProductDataItem(DynamicDocument):
         "collection": settings.MONGO_COLLECTION_DATA
     }
 
-    unique_id = StringField()
+    unique_id = StringField(unique=True)
     competitor_name = StringField()
     store_name = StringField()
     store_addressline1 = StringField()
@@ -94,7 +94,7 @@ class ProductDataItem(DynamicDocument):
     chilled = StringField()
     organictype = StringField()
     cooking_part = StringField()
-    Handmade = StringField()
+    handmade = StringField()
     max_heating_temperature = StringField()
     special_information = StringField()
     label_information = StringField()
@@ -154,7 +154,7 @@ class ProductDataItem(DynamicDocument):
     multibuy_items_pricesingle = StringField()
     perfect_match = StringField()
     servings_per_pack = StringField()
-    Warning = StringField()
+    warning = StringField()
     suitable_for = StringField()
     standard_drinks = StringField()
     environmental = StringField()
