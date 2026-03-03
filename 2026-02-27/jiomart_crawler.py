@@ -1,6 +1,6 @@
 from curl_cffi import requests
 import logging
-from settings import headers, json_data, CRAWLER_URL, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE
+from settings import headers, json_data_crawler, CRAWLER_URL, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE
 import pymongo
 from items import ProductUrlItem
 import re
@@ -16,7 +16,7 @@ class Crawler:
     def __init__(self):
         self.url = CRAWLER_URL
         self.headers = headers
-        self.payload = json_data
+        self.payload = json_data_crawler
         
         # mongodb connection
         self.mongo_uri = MONGO_URI
@@ -96,13 +96,13 @@ class Crawler:
             selling_price = None
             avg_price_list = attributes.get("avg_selling_price", {}).get("numbers", [])
             if avg_price_list:
-                selling_price = avg_price_list[0]
+                selling_price = str(avg_price_list[0])
             
             # Discount percentage
             percentage_discount = None
             avg_discount_list = attributes.get("avg_discount_pct", {}).get("numbers", [])
             if avg_discount_list:
-                percentage_discount = avg_discount_list[0]
+                percentage_discount = str(avg_discount_list[0])
                 
             # Seller names
             seller_name = None
