@@ -2,7 +2,7 @@ from curl_cffi import requests
 import logging
 import pymongo
 from parsel import Selector
-from settings import headers, headers_price_api, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, MONGO_COLLECTION_DATA, EXTRACTION_DATE, CRAWLER_URL, json_data, cookies
+from settings import headers, headers_price_api, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, MONGO_COLLECTION_DATA, EXTRACTION_DATE, CRAWLER_URL, json_data_price
 import re
 from items import ProductDataItem
 
@@ -175,11 +175,11 @@ class Parser:
             
             try:
                 # Prepare payload for specific product
-                payload = json_data.copy()
+                payload = json_data_price.copy()
                 payload['filter'] = f'attributes.product_id:ANY("{unique_id}")'
                 payload['pageSize'] = 1
                 
-                price_resp = requests.post(CRAWLER_URL, cookies=cookies, headers=self.headers, json=payload, timeout=15, impersonate="chrome110")
+                price_resp = requests.post(CRAWLER_URL, headers=self.headers, json=payload, timeout=15, impersonate="chrome110")
                 if price_resp.status_code == 200:
                     data = price_resp.json()
                     results = data.get("results", [])
