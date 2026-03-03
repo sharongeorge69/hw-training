@@ -77,15 +77,41 @@ class Parser:
         try:
             sel = Selector(response.text)
             
-            product_name = sel.xpath('//div[@id="pdp_product_name"]//text()').extract_first()
-            brand = sel.xpath('//div[@class="product-header-brand-text"]//a[@id="top_brand_name"]/text()').extract_first()
+            # XPATH
+            PRODUCT_NAME_XPATH = '//div[@id="pdp_product_name"]//text()'
+            BRAND_XPATH = '//div[@class="product-header-brand-text"]//a[@id="top_brand_name"]/text()'
+            PRODUCTHIERARCHY_LEVEL1_XPATH = "(//ul[@class='jm-breadcrumbs-list']/li)[1]/a/text()"
+            PRODUCTHIERARCHY_LEVEL2_XPATH = "(//ul[@class='jm-breadcrumbs-list']/li)[2]/a/text()"
+            PRODUCTHIERARCHY_LEVEL3_XPATH = "(//ul[@class='jm-breadcrumbs-list']/li)[3]/a/text()"
+            PACKAGE_SIZEOF_SELLINGPRICE_XPATH = '//tr[th[contains(text(), "Pack Of")]]/td/text()'
+            BREADCRUMB_LIST_XPATH = '//ul[@class="jm-breadcrumbs-list"]//a/text()'
+            DESC_NODES_XPATH = "//div[@id='pdp_description']//text()[not(ancestor::button) and not(ancestor::style) and not(ancestor::script)]"
+            STORAGE_INSTRUCTIONS_XPATH = '//tr[th[contains(text(), "Storage Category")]]/td/text()'
+            INSTRUCTIONFORUSE_XPATH = '//tr[th[contains(text(), "How To Use")]]/td/text()'
+            COUNTRY_OF_ORIGIN_XPATH = '//tr[th[contains(text(), "Country of Origin")]]/td/text()'
+            HEIGHT_XPATH = '//tr[th[contains(text(), "Height")]]/td/text()'
+            LENGTH_XPATH = '//tr[th[contains(text(), "Length")]]/td/text()'
+            WIDTH_XPATH = '//tr[th[contains(text(), "Width")]]/td/text()'
+            IMG_URLS_XPATH = (
+                "//div[contains(@class,'product-image-carousel-thumb')]"
+                "//div[contains(@class,'swiper-thumb-slides')]//img/@data-src | "
+                "//div[contains(@class,'product-image-carousel-thumb')]"
+                "//div[contains(@class,'swiper-thumb-slides')]//img/@src"
+            )
+            MANUFACTURER_ADDRESS_XPATH = '//tr[th[contains(text(), "Manufacturer Address")]]/td/text()'
+            NETWEIGHT_XPATH = '//tr[th[contains(text(), "Net Weight")]]/td/text()'
+            ALTERNATE_ID_XPATH = '//div[@id="crfe_widget"]/@data-product-id'
+
+            # EXTRACT
+            product_name = sel.xpath(PRODUCT_NAME_XPATH).extract_first()
+            brand = sel.xpath(BRAND_XPATH).extract_first()
             
             # Grammage Extraction
             grammage_quantity = ""
             grammage_unit = ""
             site_shown_uom = ""
             if product_name:
-                weight_match = re.search(r'(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|ml|l)\b', product_name, re.IGNORECASE)
+                weight_match = re.search(r'(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\b', product_name, re.IGNORECASE)
                 if weight_match:
                     grammage_quantity = str(weight_match.group(1))
                     grammage_unit = str(weight_match.group(2))
@@ -103,36 +129,29 @@ class Parser:
                 grammage_quantity = "1"
                 grammage_unit = "pack"
             
-            producthierarchy_level1 = sel.xpath("(//ul[@class='jm-breadcrumbs-list']/li)[1]/a/text()").extract_first()
-            producthierarchy_level2 = sel.xpath("(//ul[@class='jm-breadcrumbs-list']/li)[2]/a/text()").extract_first()
-            producthierarchy_level3 = sel.xpath("(//ul[@class='jm-breadcrumbs-list']/li)[3]/a/text()").extract_first()
-            package_sizeof_sellingprice = sel.xpath('//tr[th[contains(text(), "Pack Of")]]/td/text()').extract_first()
+            producthierarchy_level1 = sel.xpath(PRODUCTHIERARCHY_LEVEL1_XPATH).extract_first()
+            producthierarchy_level2 = sel.xpath(PRODUCTHIERARCHY_LEVEL2_XPATH).extract_first()
+            producthierarchy_level3 = sel.xpath(PRODUCTHIERARCHY_LEVEL3_XPATH).extract_first()
+            package_sizeof_sellingprice = sel.xpath(PACKAGE_SIZEOF_SELLINGPRICE_XPATH).extract_first()
             
-            breadcrumb_list = sel.xpath('//ul[@class="jm-breadcrumbs-list"]//a/text()').extract()
+            breadcrumb_list = sel.xpath(BREADCRUMB_LIST_XPATH).extract()
             breadcrumb = " > ".join(breadcrumb_list) if breadcrumb_list else ""
             
-            desc_nodes = sel.xpath(
-                "//div[@id='pdp_description']//text()[not(ancestor::button) and not(ancestor::style) and not(ancestor::script)]"
-            ).extract()
+            desc_nodes = sel.xpath(DESC_NODES_XPATH).extract()
             product_description = " ".join(t.strip() for t in desc_nodes if t.strip())
-            storage_instructions = sel.xpath('//tr[th[contains(text(), "Storage Category")]]/td/text()').extract_first()
-            instructionforuse = sel.xpath('//tr[th[contains(text(), "How To Use")]]/td/text()').extract_first()
-            country_of_origin = sel.xpath('//tr[th[contains(text(), "Country of Origin")]]/td/text()').extract_first()
+            storage_instructions = sel.xpath(STORAGE_INSTRUCTIONS_XPATH).extract_first()
+            instructionforuse = sel.xpath(INSTRUCTIONFORUSE_XPATH).extract_first()
+            country_of_origin = sel.xpath(COUNTRY_OF_ORIGIN_XPATH).extract_first()
             
-            height = sel.xpath('//tr[th[contains(text(), "Height")]]/td/text()').extract_first()
-            length = sel.xpath('//tr[th[contains(text(), "Length")]]/td/text()').extract_first()
-            width = sel.xpath('//tr[th[contains(text(), "Width")]]/td/text()').extract_first()
+            height = sel.xpath(HEIGHT_XPATH).extract_first()
+            length = sel.xpath(LENGTH_XPATH).extract_first()
+            width = sel.xpath(WIDTH_XPATH).extract_first()
             
             dimensions = ""
             if length and width and height:
                 dimensions = f"{length}X{width}X{height}"
                 
-            img_urls = sel.xpath(
-                "//div[contains(@class,'product-image-carousel-thumb')]"
-                "//div[contains(@class,'swiper-thumb-slides')]//img/@data-src | "
-                "//div[contains(@class,'product-image-carousel-thumb')]"
-                "//div[contains(@class,'swiper-thumb-slides')]//img/@src"
-            ).extract()
+            img_urls = sel.xpath(IMG_URLS_XPATH).extract()
             img_urls = list(dict.fromkeys(img_urls))
             img_urls = img_urls[1:7]
             image_url_1 = img_urls[0] if len(img_urls) > 0 else ""
@@ -142,8 +161,8 @@ class Parser:
             image_url_5 = img_urls[4] if len(img_urls) > 4 else ""
             image_url_6 = img_urls[5] if len(img_urls) > 5 else ""
             
-            manufacturer_address = sel.xpath('//tr[th[contains(text(), "Manufacturer Address")]]/td/text()').extract_first()
-            netweight = sel.xpath('//tr[th[contains(text(), "Net Weight")]]/td/text()').extract_first()
+            manufacturer_address = sel.xpath(MANUFACTURER_ADDRESS_XPATH).extract_first()
+            netweight = sel.xpath(NETWEIGHT_XPATH).extract_first()
             
             product_unique_key = f"{unique_id}P"
             
@@ -204,7 +223,7 @@ class Parser:
                 logger.error(f"Pricing API error for {unique_id}: {e}")
 
             # Extract alternate_id from HTML for Rating API
-            alternate_id = sel.xpath('//div[@id="crfe_widget"]/@data-product-id').get()
+            alternate_id = sel.xpath(ALTERNATE_ID_XPATH).get()
             
             # If not found in crfe_widget, look in gtmEvents data-id (unique_id often matches)
             if not alternate_id:
