@@ -1,6 +1,6 @@
 from curl_cffi import requests
 import logging
-from settings import headers, json_data_crawler, CRAWLER_URL, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE
+from settings import headers_crawler, json_data_crawler, CRAWLER_URL, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, cookies_crawler
 import pymongo
 from items import ProductUrlItem
 import re
@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 class Crawler:
     def __init__(self):
         self.url = CRAWLER_URL
-        self.headers = headers
+        self.headers = headers_crawler
         self.payload = json_data_crawler
+        self.cookies = cookies_crawler
         
         # mongodb connection
         self.mongo_uri = MONGO_URI
@@ -43,7 +44,7 @@ class Crawler:
                 if next_page_token:
                     payload['pageToken'] = next_page_token
                 
-                response = requests.post(self.url, headers=self.headers, json=payload, timeout=20, impersonate="chrome110")
+                response = requests.post(self.url, headers=self.headers, json=payload, timeout=20, impersonate="chrome110", cookies=self.cookies)
                 if response.status_code != 200:
                     logger.error(f"Failed to fetch page {page_count}: Status {response.status_code}")
                     break
