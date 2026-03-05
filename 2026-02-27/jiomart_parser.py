@@ -2,7 +2,7 @@ from curl_cffi import requests
 import logging
 import pymongo
 from parsel import Selector
-from settings import headers, headers_price_api, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, MONGO_COLLECTION_DATA, EXTRACTION_DATE, CRAWLER_URL, json_data_price
+from settings import headers, headers_price_api, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, MONGO_COLLECTION_DATA, EXTRACTION_DATE, CRAWLER_URL, json_data_price, json_data_instock, cookies_instock, headers_instock
 import re
 from items import ProductDataItem
 
@@ -107,27 +107,59 @@ class Parser:
             brand = sel.xpath(BRAND_XPATH).extract_first()
             
             # Grammage Extraction
-            grammage_quantity = ""
-            grammage_unit = ""
+            grammage_quantity = "1"
+            grammage_unit = "pack"
             site_shown_uom = ""
+            
             if product_name:
-                weight_match = re.search(r'(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\b', product_name, re.IGNORECASE)
-                if weight_match:
-                    grammage_quantity = str(weight_match.group(1))
-                    grammage_unit = str(weight_match.group(2))
-                    site_shown_uom = str(product_name).strip()
+                site_shown_uom = str(product_name).strip()
+                pn = str(product_name)
+                
+                pack_match = re.search(r'(?:pack of|pack|combo of|pack of )\s*(\d+)', pn, re.IGNORECASE)
+                pack_multiplier = pack_match.group(1) if pack_match else None
+
+                pack_mult_match = re.search(r'(?:pack of|pack)\s*(\d+)\s*[xX*]\s*(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\b', pn, re.IGNORECASE)
+                mult_match1 = re.search(r'(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\s*(?:[xX*]|Nx|nx|Xn|xn)\s*(\d+)\b', pn, re.IGNORECASE)
+                mult_match2 = re.search(r'(\d+)\s*(?:[xX*]|Nx|nx|Xn|xn|N|n)\s*(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\b', pn, re.IGNORECASE)
+                paren_weight_match = re.search(r'\(\s*(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\s*\)', pn, re.IGNORECASE)
+                hyphen_weight_match = re.search(r'-\s*(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\b', pn, re.IGNORECASE)
+                weight_match = re.search(r'(\d+(?:\.\d+)?)\s?(kg|g|gm|gms|gram|grams|grms|ml|l)\b', pn, re.IGNORECASE)
+
+                if pack_mult_match:
+                    grammage_quantity = f"{pack_mult_match.group(1)} X {pack_mult_match.group(2)}"
+                    grammage_unit = pack_mult_match.group(3)
+                elif mult_match1:
+                    grammage_quantity = f"{mult_match1.group(1)} X {mult_match1.group(3)}"
+                    grammage_unit = mult_match1.group(2)
+                elif mult_match2:
+                    grammage_quantity = f"{mult_match2.group(1)} X {mult_match2.group(2)}"
+                    grammage_unit = mult_match2.group(3)
+                elif paren_weight_match:
+                    grammage_quantity = paren_weight_match.group(1)
+                    grammage_unit = paren_weight_match.group(2)
+                    if pack_multiplier:
+                        grammage_quantity = f"{grammage_quantity} X {pack_multiplier}"
+                elif hyphen_weight_match:
+                    grammage_quantity = hyphen_weight_match.group(1)
+                    grammage_unit = hyphen_weight_match.group(2)
+                    if pack_multiplier:
+                        grammage_quantity = f"{grammage_quantity} X {pack_multiplier}"
+                elif weight_match:
+                    grammage_quantity = weight_match.group(1)
+                    grammage_unit = weight_match.group(2)
+                    if pack_multiplier:
+                        grammage_quantity = f"{weight_match.group(1)} X {pack_multiplier}"
+                elif pack_multiplier:
+                    grammage_quantity = pack_multiplier
+                    grammage_unit = "pack"
                 else:
-                    count_match = re.search(r'(\d+)\s?(sachets?|bags?|tea\s*bags?|pcs?|tablets?|capsules?|cubes?|sticks?|pouches?|boxes?|jar|pack|bottles?|tins?|cans?|count|servings?)\b', product_name, re.IGNORECASE)
-                    if count_match:
-                        grammage_quantity = str(count_match.group(1))
-                        grammage_unit = str(count_match.group(2))
-                        site_shown_uom = str(product_name).strip()
-                    else:
-                        grammage_quantity = "1"
+                    prefix_pack = re.search(r'(\d+)\s*pack', pn, re.IGNORECASE)
+                    if prefix_pack:
+                        grammage_quantity = prefix_pack.group(1)
                         grammage_unit = "pack"
-            else:
-                grammage_quantity = "1"
-                grammage_unit = "pack"
+                        
+                grammage_quantity = grammage_quantity.strip()
+                grammage_unit = grammage_unit.strip()
             
             producthierarchy_level1 = sel.xpath(PRODUCTHIERARCHY_LEVEL1_XPATH).extract_first()
             producthierarchy_level2 = sel.xpath(PRODUCTHIERARCHY_LEVEL2_XPATH).extract_first()
@@ -172,6 +204,7 @@ class Parser:
             percentage_discount = ""
             price_was = ""
             alternate_id = ""
+            article_id = ""
             
             try:
                 # Prepare payload for specific product
@@ -190,11 +223,14 @@ class Parser:
                         if variants:
                             variant = variants[0]
                             attributes = variant.get("attributes", {})
+                            alt_code_texts = attributes.get("alternate_product_code", {}).get("text", [])
+                            if alt_code_texts:
+                                article_id = alt_code_texts[0]
                             buybox_mrp = attributes.get("buybox_mrp", {}).get("text", [])
                             # Search for TXCF in buybox_mrp
                             txcf_data = next((entry for entry in buybox_mrp if entry.startswith("TXCF|")), None)
                             if not txcf_data:
-                                # Fallback to any region that has pricing data
+                                # Fallback
                                 txcf_data = next((entry for entry in buybox_mrp if "|" in entry and len(entry.split("|")) > 5), None)
                             
                             if txcf_data:
@@ -224,8 +260,6 @@ class Parser:
 
             # Extract alternate_id from HTML for Rating API
             alternate_id = sel.xpath(ALTERNATE_ID_XPATH).get()
-            
-            # If not found in crfe_widget, look in gtmEvents data-id (unique_id often matches)
             if not alternate_id:
                 alternate_id = unique_id
 
@@ -251,6 +285,35 @@ class Parser:
                             review = data.get("ratingsCount", "")
             except Exception as e:
                 logger.error(f"Rating API error for {unique_id} (alternate_id: {alternate_id}): {e}")
+
+            # Instock API Call
+            instock = "True"
+            try:
+                import copy
+                payload = copy.deepcopy(json_data_instock)
+                if payload.get("articles") and len(payload["articles"]) > 0:
+                    payload["articles"][0]["article_id"] = article_id or alternate_id or unique_id
+                
+                instock_url = "https://www.jiomart.com/platform/logistics/api/v1/promise"
+                instock_resp = requests.post(
+                    instock_url,
+                    cookies=cookies_instock,
+                    headers=headers_instock,
+                    json=payload,
+                    timeout=10,
+                    impersonate="chrome110"
+                )
+                
+                if instock_resp.status_code == 200:
+                    detail = instock_resp.json()
+                    error_data = detail.get('error') or {}
+                    msg = error_data.get('message', '')
+                    if msg == 'Not available for your pincode':
+                        instock = "False"
+                    else:
+                        instock = "True"
+            except Exception as e:
+                logger.error(f"Instock API error for {unique_id}: {e}")
 
             items = {
                 "unique_id": str(unique_id) if unique_id else "",
@@ -287,7 +350,7 @@ class Parser:
                 "manufacturer_address": str(manufacturer_address).strip() if manufacturer_address else "",
                 "netweight": str(netweight).strip() if netweight else "",
                 "site_shown_uom": str(site_shown_uom),
-                "instock": "True",
+                "instock": str(instock),
                 "product_unique_key": str(product_unique_key),
             }
             
