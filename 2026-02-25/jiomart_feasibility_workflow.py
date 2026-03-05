@@ -118,6 +118,87 @@ data = details.get("data", {})
 rating = data.get("averageRating", "")
 review = data.get("ratingsCount", "")
 
+#additional request for instock
+json_data_instock = {
+    'identifier': 'c9af40f2-2003-49c6-aab3-de6e6d5cb0cf',
+    'to_pincode': '400001',
+    'customer_details': {
+        'phone_number': '0',
+        'pincode': '400001',
+        'coordinates': {
+            'lat': 18.933906932,
+            'long': 72.838416529,
+        },
+    },
+    'articles': [
+        {
+            'article_id': 'RVIKS25PAN',
+            'vertical': 'GROCERIES',
+            'lookup_inventory': True,
+            'tenant_ids': [
+                '1006',
+            ],
+            'merchant_id': None,
+            'channel_id': None,
+            'available_at_3p_seller': True,
+            'available_at_1p_kirana': False,
+            'available_at_rrl_fc': False,
+            'available_at_rrl_store': False,
+            'available_at_3p_kirana': False,
+            'fulfillment_channel': '',
+            'delivery_type': 'grab_and_go',
+            'locked_phone': False,
+            'transport_mode': None,
+            'package_dimension': {
+                'height': 13.5,
+                'height_uom': 'cm',
+                'length': 21,
+                'length_uom': 'cm',
+                'width': 17,
+                'width_uom': 'cm',
+                'weight': 1000,
+                'weight_uom': 'gm',
+                'volumetric_weight': 960,
+                'volumetric_weight_uom': 'gm',
+                'depth': 0,
+                'depth_uom': 'cm',
+            },
+            'is_liquid': False,
+            'is_hazmat': False,
+            'is_fragile': False,
+            'is_hvi': False,
+            'ship_separate': False,
+            'exchange_details': None,
+            'qc': 1,
+            'suspect': 1,
+            'distance': 0.6083433185263083,
+            'site_fallback': 0,
+            'force_fit_store': 'T6HZ',
+            'region': 'TXCF',
+            'polygon_id': 'T6HZ_QC_5475bdd9',
+        },
+    ],
+}
+
+
+instock_url = "https://www.jiomart.com/platform/logistics/api/v1/promise"
+instock_resp = requests.post(
+    instock_url,
+    headers=headers,
+    json=json_data_instock,
+    impersonate="chrome110"
+)
+                
+if instock_resp.status_code == 200:
+    detail = instock_resp.json()
+    error_data = detail.get('error') or {}
+    msg = error_data.get('message', '')
+    if msg == 'Not available for your pincode':
+        instock = "False"
+    else:
+        instock = "True"
+
 #############findings##############
 
-#1. pricing information returned by the product API does not consistently align with the pricing displayed on the website frontend.
+#1.its difficult to find an accurate regex pattern that works across all the products_name to extract grammage quantity and unit.
+#2. Additional requests for price, rating and instock are required to get the complete data.
