@@ -1,0 +1,9 @@
+Researched asynchronous programming patterns in Python using asyncio and aiohttp to optimize I/O-bound scraping tasks and improve overall execution efficiency.
+
+Commenced a technical feasibility study for eReplacementparts, mapping the site's architecture to identify potential anti-scraping triggers and navigation structures.
+
+Performed network security testing to identify IP-based block thresholds and successfully developed a workflow for extracting high-level category URLs.
+
+Designed robust XPath selectors for required data fields and implemented the initial crawler logic to navigate product categories efficiently.
+
+
