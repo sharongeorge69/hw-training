@@ -159,9 +159,6 @@ def export_data():
         
         with open(FILE_NAME_FULLDUMP, 'w', newline='', encoding='utf-8') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=csv_headers, extrasaction='ignore', delimiter='|', quoting=csv.QUOTE_ALL)
-        #     with open("filename.csv", "w", encoding="utf-8", newline="") as success_file:
-        # writer_file = csv.writer(success_file, delimiter="|", quotechar='"')
-        # export = Export(writer_file)
             writer.writeheader()
             
             count = 0
@@ -174,6 +171,8 @@ def export_data():
                         val = ""
                     
                     val_str = str(val).strip()
+                    if val_str.lower() in ["na", "none"]:
+                        val_str = ""
                     
                     # Clean the product description
                     if header == "product_description":
