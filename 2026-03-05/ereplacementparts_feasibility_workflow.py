@@ -11,13 +11,13 @@ headers = {
 # 1. Get all main category links (from Sitemap)
 response = requests.get('https://www.ereplacementparts.com/sitemap/', headers=headers)
 sel = Selector(text=response.text)
-main_categories = sel.xpath("//div[@class='sitemap-section']//h2/a/@href").getall()
+main_categories = sel.xpath("//a[contains(@class, 'text-lg underline')]/@href").getall()
 
 
 # 2. Inside a main category (e.g. Appliance), get all subcategory/brand links
 response = requests.get('https://www.ereplacementparts.com/parts/appliance/', headers=headers)
 sel = Selector(text=response.text)
-subcategory_links = sel.xpath("//div[@id='BrandList']//a/@href").getall() 
+subcategory_links = sel.xpath("//*[@id='ShopByBrand']/following-sibling::ul[1]//a/@href").getall() 
 
 # 3. Drill down to a specific Brand/Category intersection (Terminal Discovery)
 # (e.g. Dishwasher -> Bosch Models)
@@ -26,7 +26,7 @@ sel = Selector(text=response.text)
 
 # Extract total count and specific terminal page links (individual models)
 total_count = sel.xpath("//div[@class='summary']/text()").get() 
-terminal_links = sel.xpath("//div[@id='model-list']//a/@href").getall()
+terminal_links = sel.xpath("//ul[contains(@class, 'mini-model-icons')]//a/@href").getall()
 
 
 ####################### C R A W L E R ############################
