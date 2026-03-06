@@ -19,6 +19,9 @@ response = requests.get('https://www.ereplacementparts.com/parts/appliance/', he
 sel = Selector(text=response.text)
 subcategory_links = sel.xpath("//*[@id='ShopByBrand']/following-sibling::ul[1]//a/@href").getall() 
 
+response = requests.get('https://www.ereplacementparts.com/parts/bosch/', headers=headers)
+part_urls = sel.xpath("//h2[normalize-space()='All Bosch Product Types']/following-sibling::*//a/@href").getall()
+
 # 3. Drill down to a specific Brand/Category intersection (Terminal Discovery)
 # (e.g. Dishwasher -> Bosch Models)
 response = requests.get('https://www.ereplacementparts.com/parts/appliance/dishwasher/bosch/models/', headers=headers)
