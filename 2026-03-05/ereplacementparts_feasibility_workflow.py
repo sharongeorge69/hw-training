@@ -82,18 +82,32 @@ description = sel.xpath('//p[@itemprop="description"]//text()').extract_first()
 
 availability = sel.xpath('//span[@itemprop="availability"]//text()').get()
 
-imageurls = sel.xpath(
-    "//div[@class='pd__img']//@src | "
-    "//div[@class='pd__img']//@data-large-src | "
-    "//div[@class='pd__img']//@data-med-src"
-).getall()
-
 image = sel.xpath('//div[@class="pd__img"]//a/@href').getall()
 
 
 input_part_number = sel.xpath("//dt[normalize-space()='Part Number:']/following-sibling::dd[1]/text()").get()
 
 equivalent_part_number = sel.xpath("//div[@id='Troubleshooting']//div[contains(normalize-space(),'replaces these')]/following-sibling::ul[1]/li//text()").getall()
-compatible_products = sel.xpath(
-    "//div[contains(@class,'pd__crossref')]//tbody//tr/td[2]/a/text()"
-).getall()
+
+""" compatible_product has infinite scroll logic, so when we write normal xpath it will not fetch all the data, so we need to use infinite scroll logic to fetch all the data"""
+
+COMPATIBLE_ROWS_XPATH = "//tbody//tr/td[2]/a/text()"
+INVENTORY_ID_XPATH    = "//div[@data-handler='ModelCrossReference']/@data-inventory-id"
+inventory_id = sel.xpath(INVENTORY_ID_XPATH).extract_first()
+page1_models = sel.xpath(COMPATIBLE_ROWS_XPATH).extract()
+api_url = f"{pdp_url}?currentPage={page}&inventoryID={inventory_id}&handler=ModelCrossReference&"
+resp = requests.get(api_url, headers=self.headers, impersonate="chrome110", timeout=20)
+sel = Selector(text=resp.text)
+COMPAT_API_XPATH = "//tr/td[2]/a/text()"
+extra_models = []
+rows = sel.xpath(COMPAT_API_XPATH).extract()
+extra_models.extend(rows)
+compatible_products = ", ".join(page1_models + extra_models)
+
+#################Findings###################
+
+""" 1. Compatible products has infinite scroll, so we need to use infinite scroll logic to fetch all the data, initial
+xpath returns only 30 items, so we need to use infinite scroll logic to fetch all the data
+"""
+
+""" 2. Its difficult to predict the exact number of product count from the site """
