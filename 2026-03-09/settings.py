@@ -8,7 +8,9 @@ MONGO_COLLECTION_CATEGORY = f"{PROJECT_NAME}_category_url"
 MONGO_COLLECTION_RESPONSE = f"{PROJECT_NAME}_url"
 MONGO_COLLECTION_DATA = f"{PROJECT_NAME}_data"
 
-MONGO_URI = "mongodb://localhost:27017/"
+# MONGO_URI = "mongodb://localhost:27017/"
+MONGO_URI = "mongodb://mongotraining:a4892e52373844dc4862e6c468d11b6df7938e16@209.97.183.63:27017/?authSource=admin"
+
 
 headers_crawler = {
     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36',
