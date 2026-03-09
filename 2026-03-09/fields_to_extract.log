@@ -1,0 +1,30 @@
+#17 / partpros/ecommerce / 2026-03-05/ Priority 1
+
+Target sites
+https://www.ereplacementparts.com
+
+Category
+Full site
+
+Fields to extract
+input part number
+url
+title
+manufacturer
+price
+description
+OEM part number
+retailer part number
+competitor part numbers
+compatible products
+equivalent part numbers
+product specifications
+additional description
+Availability
+image urls
+linked files
+
+Data format
+CSV
+
+Additional info
