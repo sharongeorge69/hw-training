@@ -88,11 +88,12 @@ imageurls = sel.xpath(
     "//div[@class='pd__img']//@data-med-src"
 ).getall()
 
-input_part_number = sel.xpath('//dd[@itemprop="mpn"]//text()').extract_first()
+image = sel.xpath('//div[@class="pd__img"]//a/@href').getall()
 
 
-equivalent_part_number = sel.xpath("//div[contains(text(),'replaces these')]/following-sibling::ul[1]/li/text()").getall()
+input_part_number = sel.xpath("//dt[normalize-space()='Part Number:']/following-sibling::dd[1]/text()").get()
 
+equivalent_part_number = sel.xpath("//div[@id='Troubleshooting']//div[contains(normalize-space(),'replaces these')]/following-sibling::ul[1]/li//text()").getall()
 compatible_products = sel.xpath(
     "//div[contains(@class,'pd__crossref')]//tbody//tr/td[2]/a/text()"
 ).getall()
