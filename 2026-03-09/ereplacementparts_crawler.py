@@ -60,7 +60,7 @@ class Crawler:
 
         # EXTRACT
         raw_links = sel.xpath(PDP_LINKS_XPATH).extract()
-        unique_links = list(dict.fromkeys(raw_links))  # Preserve order, remove duplicates
+        unique_links = list(dict.fromkeys(raw_links))  
 
         for link in unique_links:
             if not link.startswith("http"):
