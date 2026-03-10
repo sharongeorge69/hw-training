@@ -27,3 +27,27 @@ class ProductDataItem(DynamicDocument):
     availability = StringField()
     image_urls = StringField()
     linked_files = StringField()
+
+
+class CategoryItem(DynamicDocument):
+    """
+    Collection for scraped eReplacementParts category URLs.
+    """
+    meta = {
+        "db_alias": "default",
+        "collection": settings.MONGO_COLLECTION_CATEGORY
+    }
+
+    category_url = StringField(unique=True)
+
+
+class ResponseURLItem(DynamicDocument):
+    """
+    Collection for scraped eReplacementParts PDP URLs.
+    """
+    meta = {
+        "db_alias": "default",
+        "collection": settings.MONGO_COLLECTION_RESPONSE
+    }
+
+    pdp_url = StringField(unique=True)
