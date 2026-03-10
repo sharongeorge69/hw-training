@@ -7,6 +7,8 @@ from settings import (
     MONGO_COLLECTION_CATEGORY,
     BASE_URL, headers_crawler
 )
+import pymongo
+from items import CategoryItem
 
 # Configure Logging
 logging.basicConfig(
@@ -141,12 +143,16 @@ class Crawler:
                 "category_url": link
             }
             try:
+                category_item = CategoryItem(**item)
+                category_item.validate()
                 self.collection.update_one(
                     {"category_url": link},
                     {"$set": item},
                     upsert=True
                 )
                 logger.info(f"Saved: {link}")
+            except pymongo.errors.DuplicateKeyError:
+                logger.debug(f"Skipped duplicate: {link}")
             except Exception as e:
                 logger.error(f"Failed to save {link}: {e}")
 
