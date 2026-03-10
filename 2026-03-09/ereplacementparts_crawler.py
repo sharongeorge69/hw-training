@@ -9,6 +9,7 @@ from settings import (
     MONGO_COLLECTION_RESPONSE,
     BASE_URL, headers_crawler
 )
+from items import ResponseURLItem
 
 # Configure Logging
 logging.basicConfig(
@@ -78,10 +79,12 @@ class Crawler:
             }
 
             try:
+                response_item = ResponseURLItem(**item)
+                response_item.validate()
                 self.url_collection.insert_one(item)
                 logger.info(f"Saved: {clean_url}")
             except pymongo.errors.DuplicateKeyError:
-                pass 
+                logger.debug(f"Skipped duplicate: {clean_url}")
             except Exception as e:
                 logger.error(f"Save error for {clean_url}: {e}")
 
