@@ -108,3 +108,13 @@ alchol_by_volume = sel.xpath(
 ).getall()
 site_shown_uom = sel.xpath('normalize-space(//h1[contains(@class,"title") and contains(@class,"hide-sm")]//span)').get()
 instock = data['products'][0]['isPriceAvailable']
+
+
+
+######################## FINDINGS #############################
+
+"""
+1. the server IP is immediately detected and blocked (returning Status 456).
+2. when testing block check in server using curl_cffi for every response it was 456.
+3. while block checking locally for the first 40-50 requests the status is 200 , but after all other requests are returning status code 405 which indicates there might be rate-limiting or volume-based block 
+"""
