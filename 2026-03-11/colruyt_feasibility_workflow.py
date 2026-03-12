@@ -103,10 +103,21 @@ price_per_unit = data['products'][0]['promotion'][0]['measurementUnitPrice']
 curreny = "euro"
 product_description = data['products'][0]['description']
 image_url_1 = data['products'][0]['squareImage']
+alchol_by_volume = sel.xpath(
+    '//ul[contains(@class,"product-detail__lifestyles")]//li/text()'
+).getall()
 site_shown_uom = sel.xpath('normalize-space(//h1[contains(@class,"title") and contains(@class,"hide-sm")]//span)').get()
 instock = data['products'][0]['isPriceAvailable']
 
+#promotion details are loaded from api
+url = 'https://apip.colruyt.be/gateway/ictmgmt.emarkecom.promotionretrsvc.v2/v2/nl/promotion?promotionIds=1022COLR&clientCode=CLP&placeId=604'
 
+resp = requests.get(
+            url,
+            impersonate="chrome120",
+        )
+
+promotion_details = resp.json()['promotions'][0]['benefit']
 
 ######################## FINDINGS #############################
 
