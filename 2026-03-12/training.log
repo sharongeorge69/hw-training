@@ -1,0 +1,13 @@
+Conducted a deep-dive analysis of the Colruyt platform's frontend and backend communication to map out data flows and identify the most efficient scraping entry points.
+
+Participated in the daily sync-up to resolve technical blockers, clarify project requirements, and align on development priorities for the Colruyt project.
+
+Analyzed server logs and active crawler requests to ensure optimal performance, monitoring for high latency or unexpected response codes.
+
+Performed rigorous block-checking to identify IP rate-limiting thresholds and evaluated the site's defensive response to various header configurations.
+
+Initiated the core development of the Colruyt crawler and parser, architecting the logic to handle both navigation and data extraction within a unified framework.
+
+Executed comprehensive testing of the discovered API endpoints, verifying the accuracy of extracted data fields against the live site to ensure high data integrity.
+
+
