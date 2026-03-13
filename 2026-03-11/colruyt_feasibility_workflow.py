@@ -1,6 +1,5 @@
 ######################  CRAWLER  ######################
 
-base_url = "https://apip.colruyt.be/gateway/emec.colruyt.protected.bffsvc/cg/nl/api/product-search-prs"
 headers = {
     'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
     'accept-encoding': 'gzip, deflate, br, zstd',
@@ -35,30 +34,24 @@ cookies = {
         '_uetvid': '351828b01d1111f18ea3c9702d6e0056',
         'utag_main': 'v_id:019cdb85ba4f0022d00e1906bd6005065004805d00bd0$_sn:1$_se:65$_ss:0$_st:1773211785096$ses_id:1773209500239%3Bexp-session$_pn:4%3Bexp-session$dc_visit:1$dc_event:11%3Bexp-session$dc_region:eu-central-1%3Bexp-session',
     }
+base_url = "https://apip.colruyt.be/gateway/emec.colruyt.protected.bffsvc/cg/nl/api/product-search-prs"
+
 from curl_cffi import requests
-place_id = 604  
 skip = 0
 total_found = None
+page_size = 22
 all_products = []
 params = {
-            'placeId': place_id,
+            'placeId': 604,
             'skip': skip,
             'size': page_size,
             'sort': 'relevancy asc',
             'isAvailable': 'true'
         }
-params_list = [f"{k}={v}" for k, v in params.items()]
-for cat_id in category_ids:
-    params_list.append(f"categoryIds={cat_id}")   
-    params_str = "&".join(params_list)
-    full_url = f"{base_url}?{params_str}"
-response = requests.get(full_url,headers=headers,cookies = cookies,impersonate="chrome120", 
-            )
-
-data = resp.json()
-
+response = requests.get(base_url,headers=headers,cookies = cookies,impersonate="chrome120", params=params)
+data = response.json()
 products = data.get('products', [])
-art_num = prod.get('commercialArticleNumber')
+art_num = products.get('commercialArticleNumber')
 pdp_url = f"https://www.colruyt.be/nl/producten/{art_num}" if art_num else None
 
 
@@ -66,63 +59,68 @@ pdp_url = f"https://www.colruyt.be/nl/producten/{art_num}" if art_num else None
 
 
 from curl_cffi import requests
-url = "https://www.colruyt.be/nl/producten/5331"
-response = requests.get(url, headers=headers, impersonate="chrome110")
-sel = Selector(text=response.text)
-unique_id = sel.xpath(
-    '//div[@data-vue="participatingProducts"]/@data-product-id'
-).get()
-product_name = sel.xpath("//h1[@class='title hide-sm']/text()").get()
+url = "https://apip.colruyt.be/gateway/emec.cust.prdretr.extsvcv3/v3/nl/api/products/detail"
+params = {
+            'placeId': '604',
+            'clientCode': 'CLP',
+            'ensignCountryCode': '8_BE',
+            'technicalArtNo': tech_art_no,
+            'dataGroup': 'ALL',
+        }
+        
+resp = requests.get(url, params=params, impersonate="chrome110", timeout=20)
+product_details = resp.json()
+brand = product_details.get('brand', '')
+name = product_details.get('name', '')
+product_name = f"{brand} {name}"
 competitor_name = "colruyt"
-brand = sel.xpath("//div[@class='product-detail__title-container']//a/text()").extract_first()
-grammage_quantity = sel.xpath('normalize-space(//h1[contains(@class,"title") and contains(@class,"hide-sm")]//span)').get()
-grammage_unit = sel.xpath('normalize-space(//h1[contains(@class,"title") and contains(@class,"hide-sm")]//span)').get()
-breadcrumbs = sel.xpath(
-    '//li[@itemtype="https://schema.org/ListItem"]//span[@itemprop="name"]/text()'
-).getall()
-allergens = sel.xpath(
-    'normalize-space(//div[contains(@class,"product-detail__allergen")]//li)'
-).get()
+
+grammage_quantity = ""
+grammage_unit = ""
+match = re.match(r'([\d,\.]+)([a-zA-Z]+)', content)
+if match:
+    grammage_quantity = match.group(1) 
+    grammage_unit = match.group(2)
+
+#producthierarchy
+categories = product_details.get("categories", [])
+name = product_details.get("name", "") 
+brand = product_details.get("brand", "")
+
+levels = []              
+
+node = categories[0] if categories else None
+levels.append(node.get("name"))
+children = node.get("children")         
+node = children[0] if children else None
+levels.append(f"{brand} {name}")   
+breadcrumb = " > ".join(levels) if levels else ""
+
+price = product_details.get('price')
+if isinstance(price, dict):
+    basicPrice = price.get('basicPrice')
+    quantityPrice = price.get('quantityPrice') if price.get('quantityPrice') else ""
+    quantityPriceQuantity = price.get('quantityPriceQuantity') if price.get('quantityPriceQuantity') else ""
+regular_price = str(basicPrice)
+selling_price = regular_price
+
+promotion_valid_from = str(product_details.get('publicationStartDate', ''))
+promotion_valid_upto = str(product_details.get('publicationEndDate', ''))
+price_valid_from = promotion_valid_from
+price_per_unit = str(product_details.get('measurementUnitPrice', ''))
+description_raw = product_details.get("description", "")
+image_url_1 = str(product_details.get('fullImage', ''))
+allergens_data = product_details.get("allergenAttributes", {})
+
+promotion_description = ""
+if quantityPrice:
+    promotion_description = f"{quantityPrice} vanaf {quantityPriceQuantity} st"
 
 product_unique_key = f"{unique_id}P"
 
-#price is loaded from api
-url = 'https://apip.colruyt.be/gateway/emec.colruyt.protected.bffsvc/cg/nl/api/5331/alternatives?placeId=604&limit=6'
-
-resp = requests.get(
-            url,
-            impersonate="chrome120",
-        )
-
-selling_price = resp.json()['products'][0]['price']['basicPrice']
-promotion_price= data['products'][0]['price']['quantityPrice']
-promotion_valid_from = data['products'][0]['promotion'][0]['publicationStartDate']
-promotion_valid_upto = data['products'][0]['promotion'][0]['publicationEndDate']
-price_valid_from = data['products'][0]['promotion'][0]['publicationStartDate']
-price_per_unit = data['products'][0]['promotion'][0]['measurementUnitPrice']
-curreny = "euro"
-product_description = data['products'][0]['description']
-image_url_1 = data['products'][0]['squareImage']
-alchol_by_volume = sel.xpath(
-    '//ul[contains(@class,"product-detail__lifestyles")]//li/text()'
-).getall()
-site_shown_uom = sel.xpath('normalize-space(//h1[contains(@class,"title") and contains(@class,"hide-sm")]//span)').get()
-instock = data['products'][0]['isPriceAvailable']
-
-#promotion details are loaded from api
-url = 'https://apip.colruyt.be/gateway/ictmgmt.emarkecom.promotionretrsvc.v2/v2/nl/promotion?promotionIds=1022COLR&clientCode=CLP&placeId=604'
-
-resp = requests.get(
-            url,
-            impersonate="chrome120",
-        )
-
-promotion_details = resp.json()['promotions'][0]['benefit']
 
 ######################## FINDINGS #############################
 
-"""
-1. the server IP is immediately detected and blocked (returning Status 456).
-2. when testing block check in server using curl_cffi for every response it was 456.
-3. while block checking locally for the first 40-50 requests the status is 200 , but after all other requests are returning status code 405 which indicates there might be rate-limiting or volume-based block 
-"""
+#1. Crawler api works locally(not in server) but has blocking issues
+#2.Promotion api as blocking issues
+ 
