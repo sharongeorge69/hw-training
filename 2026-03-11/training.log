@@ -1,0 +1,9 @@
+Conducted an in-depth feasibility study for the Colruyt platform, evaluating the site's front-end architecture and back-end API responses to determine the most stable and efficient scraping approach.
+
+Authored and tested a series of specialized XPath selectors in a local environment to verify accurate data extraction for core product fields, including price, description, and stock availability.
+
+Developed the core crawler codebase for the Colruyt project, focusing on session management and the hierarchical logic required to navigate department and category listings.
+
+Participated in a technical sync-up to address implementation hurdles, specifically resolving challenges related to dynamic content rendering and proxy stability.
+
+
