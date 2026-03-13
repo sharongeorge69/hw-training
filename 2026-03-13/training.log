@@ -1,0 +1,13 @@
+Conducted a deep-dive structural analysis of the Colruyt platform to map data hierarchies and initiated the development of a specialized parser to handle complex product attributes.
+
+Participated in a technical briefing to align on project milestones, discuss site-specific challenges, and finalize the data schema for upcoming deliverables.
+
+Authored robust parsing routines focused on transforming raw JSON responses.
+
+Finalized the crawler and parser codebase, performing end-to-end execution tests to verify that the extracted data aligns perfectly with the target schema.
+
+Prepared a comprehensive QA checklist, defining strict validation rules for critical fields like pricing, availability, and unit normalization to maintain high data standards.
+
+Executed a secondary Quality Assurance review on datasets provided by team members, identifying and flagging inconsistencies to ensure collective project accuracy.
+
+
