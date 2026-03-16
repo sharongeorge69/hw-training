@@ -105,12 +105,6 @@ CSV_HEADERS = [
   "image_url_2",
   "file_name_3",
   "image_url_3",
-  "file_name_4",
-  "image_url_4",  
-  "file_name_5",
-  "image_url_5",
-  "file_name_6",  
-  "image_url_6",
   "competitor_product_key",
   "fit_guide",
   "occasion",
@@ -163,6 +157,38 @@ ALLERGEN_MAP = {
     "Sesameseeds": "Sesamzaden",
     "Celery": "Selder"
 }
+
+TECH_PROMO_MAP = {
+    "100871COLR": "12+6 GRATIS",
+    "100878COLR": "-10% vanaf 12 st, -20% vanaf 24 st",
+    "1707COLR": "8+4 GRATIS",
+    "100872COLR": "5+1 GRATIS",
+    "100882COLR": "-20% vanaf 12 st",
+    "100883COLR": "-25% vanaf 3 st",
+    "100998COLR": "1+1 GRATIS",
+    "100879COLR": "1+1 GRATIS",
+    "1022COLR": "-25% vanaf 2 st"
+}
+
+def format_extraction_date(date_str):
+    if not date_str:
+        return ""
+    # Convert yyyy-mm-dd to yyyy_mm_dd
+    return date_str.replace('-', '_')
+
+def format_validity_date(date_str):
+    if not date_str:
+        return ""
+    # Convert DD-MM-YYYY to D/M/YYYY (removing leading zeros)
+    # e.g., 11-03-2026 -> 11/3/2026
+    # e.g., 01-01-2026 -> 1/1/2026
+    match = re.match(r'(\d{1,2})-(\d{1,2})-(\d{4})', date_str)
+    if match:
+        day = int(match.group(1))
+        month = int(match.group(2))
+        year = match.group(3)
+        return f"{day}/{month}/{year}"
+    return date_str
 
 def clean_description(description_raw):
     if not description_raw:
@@ -270,6 +296,10 @@ def export_data():
                 site_shown_uom = doc.get("site_shown_uom", "")
                 g_qty, g_unit = extract_grammage(site_shown_uom)
 
+                # Get techPromoId mapping if it exists
+                tech_promo_id = doc.get("techPromoId", "")
+                tech_promo_text = TECH_PROMO_MAP.get(tech_promo_id, "")
+
                 for header in CSV_HEADERS:
                     val = doc.get(header, "")
                     if val is None:
@@ -293,6 +323,17 @@ def export_data():
                     
                     elif header == "promotion_description":
                         val_str = clean_promotion_description(val_str)
+                        if tech_promo_text:
+                            if val_str:
+                                val_str = f"{val_str}, {tech_promo_text}"
+                            else:
+                                val_str = tech_promo_text
+                    
+                    elif header == "extraction_date":
+                        val_str = format_extraction_date(val_str)
+                    
+                    elif header in ["promotion_valid_from", "promotion_valid_upto", "price_valid_from"]:
+                        val_str = format_validity_date(val_str)
                     
                     elif header == "grammage_quantity":
                         val_str = g_qty
