@@ -173,15 +173,14 @@ TECH_PROMO_MAP = {
 def format_extraction_date(date_str):
     if not date_str:
         return ""
-    # Convert yyyy-mm-dd to yyyy_mm_dd
-    return date_str.replace('-', '_')
+ 
+    return date_str.replace('_', '-')
 
 def format_validity_date(date_str):
     if not date_str:
         return ""
     # Convert DD-MM-YYYY to D/M/YYYY (removing leading zeros)
     # e.g., 11-03-2026 -> 11/3/2026
-    # e.g., 01-01-2026 -> 1/1/2026
     match = re.match(r'(\d{1,2})-(\d{1,2})-(\d{4})', date_str)
     if match:
         day = int(match.group(1))
@@ -261,7 +260,7 @@ def extract_grammage(site_shown_uom):
         # match digits, commas, dots and 'x' for quantity, followed by letters for unit
         match = re.search(r'([\d,\.xX]+)\s*([a-zA-Z]+)', site_shown_uom)
         if match:
-            quantity = match.group(1).strip()
+            quantity = match.group(1).strip().replace(',', '.')
             unit = match.group(2).strip()
     return quantity, unit
 
@@ -344,6 +343,9 @@ def export_data():
                     elif header == "currency":
                         if val_str.lower() == "euro":
                             val_str = "EUR"
+                    
+                    elif header == "site_shown_uom":
+                        val_str = val_str.replace(',', '.')
                     
                     row[header] = val_str
                     
