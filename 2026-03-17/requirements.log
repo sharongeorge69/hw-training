@@ -1,0 +1,24 @@
+Agent Data - Requirement
+
+Target Sites
+
+1. https://www.ewm.com/agents.php
+2. https://www.robertsbrothers.com/roster/Agents
+
+Fields to be extracted
+profile_url
+address
+agent_phone_numbers
+country
+description
+email
+first_name
+image_url
+last_name
+middle_name
+social_links
+title
+website
+
+Data Format
+JSON
