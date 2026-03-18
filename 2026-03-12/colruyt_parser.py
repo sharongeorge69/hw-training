@@ -1,6 +1,5 @@
 import logging
 import re
-import json
 import pymongo
 import time
 import random
@@ -10,6 +9,7 @@ from pymongo import MongoClient
 from settings import (
     MONGO_URI, MONGO_DB,
     MONGO_COLLECTION_RESPONSE, MONGO_COLLECTION_DATA,
+    MONGO_COLLECTION_RAW_RESPONSE, MONGO_COLLECTION_URL_FAILED,
     headers_api, cookies,EXTRACTION_DATE
 )
 from items import ProductDataItem
@@ -38,7 +38,10 @@ class Parser:
         self.db = self.client[MONGO_DB]
         self.url_collection = self.db[MONGO_COLLECTION_RESPONSE]
         self.product_collection = self.db[MONGO_COLLECTION_DATA]
+        self.raw_collection = self.db[MONGO_COLLECTION_RAW_RESPONSE]
+        self.failed_url_collection = self.db[MONGO_COLLECTION_URL_FAILED]
         self.product_collection.create_index("unique_id", unique=True)
+        self.raw_collection.create_index("unique_id", unique=True)
         logger.info("Connected to MongoDB")
 
     # def fetch_promotion_details(self, promo_id):
@@ -78,7 +81,7 @@ class Parser:
     #     return ""
 
     def fetch_product_details(self, tech_art_no):
-        """Fetch full product details."""
+        """Fetch full product details with retry logic."""
         url = "https://apip.colruyt.be/gateway/emec.cust.prdretr.extsvcv3/v3/nl/api/products/detail"
         params = {
             'placeId': '604',
@@ -88,15 +91,29 @@ class Parser:
             'dataGroup': 'ALL',
         }
         
-        try:
-            time.sleep(random.uniform(0.5, 1.5))
-            resp = self.session.get(url, params=params, impersonate="chrome110", timeout=20)
-            if resp.status_code == 200:
-                return resp.json()
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                time.sleep(random.uniform(0.5, 1.5))
+                resp = self.session.get(url, params=params, impersonate="chrome110", timeout=20)
+                
+                if resp.status_code == 200:
+                    try:
+                        return resp.json()
+                    except ValueError as e:
+                        logger.error(f"  JSON decode error for {tech_art_no} on attempt {attempt + 1}: {e}")
+                else:
+                    logger.error(f"  Failed [{resp.status_code}] to fetch product details for: {tech_art_no} (Attempt {attempt + 1})")
+            
+            except (requests.errors.Timeout, requests.errors.RequestError) as e:
+                logger.warning(f"  Retryable error for {tech_art_no} on attempt {attempt + 1}: {e}")
+            
+            if attempt < max_retries - 1:
+                wait_time = 2 * (attempt + 1) + random.uniform(0, 1)
+                time.sleep(wait_time)
             else:
-                logger.error(f"Failed [{resp.status_code}] to fetch product details for: {tech_art_no}")
-        except Exception as e:
-            logger.error(f"Error fetching product details {tech_art_no}: {e}")
+                logger.error(f"  Max retries reached for product details: {tech_art_no}")
+        
         return ""
 
 
@@ -124,6 +141,16 @@ class Parser:
             # 1. Fetch Product Details
             product_details = self.fetch_product_details(technical_article_number)
             
+            if not product_details:
+                logger.error(f"Skipping {unique_id} because all retries failed.")
+                # Add to failed collection
+                self.failed_url_collection.update_one(
+                    {"unique_id": unique_id},
+                    {"$set": doc},
+                    upsert=True
+                )
+                continue
+
             # 2. Fetch Promotion Details (if applicable)
             # promotion_details = ""
             # if tech_promo_id:
@@ -133,122 +160,122 @@ class Parser:
             self.parse_item(unique_id, doc, product_details)
 
     def parse_item(self, unique_id, payload, product_details):
-        
 
-        brand = payload.get('brand', '')
-        name = payload.get('name', '')
-        product_name = f"{brand} {name}" 
         content = payload.get('content', '')
+        pdp_url = str(payload.get('pdp_url', ''))
+        is_available = str(payload.get('isAvailable', ''))
+        pub_start = str(payload.get('publicationStartDate', ''))
+        pub_end = str(payload.get('publicationEndDate', ''))
+        full_image = str(payload.get('fullImage', ''))
+
+        measurement_unit_quantity_price = str(payload.get('measurementUnitQuantityPrice', ''))
+        measurement_unit_price_payload = str(payload.get('measurementUnitPrice', ''))
+        measurement_unit = str(payload.get('measurementUnit', ''))
+        price_per_uom = str(payload.get('pricePerUOM', ''))
+        tech_promo_id = str(payload.get('techPromoId', ''))
+        promotion_id = str(payload.get('promotionId', ''))
+
+        name = product_details.get("name", "")
+        brand = product_details.get("brand", "")
+        detail_desc_raw = product_details.get("description", "")
+        detail_origin = str(product_details.get('CountryOfOrigin', ''))
+        categories = product_details.get("categories", [])
+        allergens_data = product_details.get("allergenAttributes", {})
+
+        #product name
+        product_name = f"{brand} {name}".strip()
+        
+        # Grammage extraction
         grammage_quantity = ""
         grammage_unit = ""
         match = re.match(r'([\d,\.]+)([a-zA-Z]+)', content)
         if match:
-            grammage_quantity = match.group(1) 
-            grammage_unit = match.group(2)
+            grammage_quantity = match.group(1).replace(',', '.')
+            grammage_unit = match.group(2).lower()
 
-        #producthierarchy
-        categories = product_details.get("categories", [])
-        name = product_details.get("name", "") 
-        brand = product_details.get("brand", "")
-        
-        levels = []              
-        
+        # Hierarchy & Breadcrumb
+        levels = []
         node = categories[0] if categories else None
-        
-        # Traverse category hierarchy                                                                    
-        while node:            
+        while node:
             levels.append(node.get("name"))
-            children = node.get("children")         
+            children = node.get("children")
             node = children[0] if children else None
         
-        levels.append(f"{brand} {name}")   
-                                        
-        # Assign to producthierarchy levels         
-        producthierarchy = {}
-        
-        for i, value in enumerate(levels, start=1):
-            producthierarchy[f"producthierarchy_level{i}"] = value   
-
-        price = product_details.get('price')
-        if isinstance(price, dict):
-            basicPrice = price.get('basicPrice')
-            quantityPrice = price.get('quantityPrice') if price.get('quantityPrice') else ""
-            quantityPriceQuantity = price.get('quantityPriceQuantity') if price.get('quantityPriceQuantity') else ""
-        regular_price = str(basicPrice)
-        selling_price = regular_price
-
-        # Build breadcrumb string
+        levels.append(f"{brand} {name}".strip())
         breadcrumb = " > ".join(levels) if levels else ""
+
+        # Price processing
+        basic_price = ""
+        quantity_price = ""
+        quantity_price_quantity = ""
+        measurement_unit_price = ""
         
-        promotion_valid_from = str(payload.get('publicationStartDate', ''))
-        promotion_valid_upto = str(payload.get('publicationEndDate', ''))
-        price_valid_from = promotion_valid_from
-        price_per_unit = str(payload.get('measurementUnitPrice', ''))
-        #product description
-        description_raw = product_details.get("description", "")
+        #price details
+        price_dict = product_details.get('price', {})
+        basic_price = price_dict.get('basicPrice', '')
+        quantity_price = price_dict.get('quantityPrice', '')
+        quantity_price_quantity = price_dict.get('quantityPriceQuantity', '')
+        measurement_unit_price = price_dict.get('measurementUnitPrice', '')
+
+        regular_price = str(basic_price)
+        selling_price = regular_price
+        price_per_unit = str(measurement_unit_price)
+
+        # Description cleaning
         description = ", ".join(
             re.sub(r'^[\*\-\•]\s*', '', d).strip()
-            for d in description_raw.split("\n")
+            for d in detail_desc_raw.split("\n")
             if d.strip()
         )
-        image_url_1 = str(payload.get('fullImage', ''))
-        country_of_origin = str(product_details.get('CountryOfOrigin', ''))
-        #allergens
-        allergens_data = product_details.get("allergenAttributes", {})
-        allergens = []
 
+        # Allergens processing
+        allergens_list = []
         for key, value in allergens_data.items():
             if value == "CONTAINS":
-                allergen = key.replace("AllergenDetails", "")
-                allergen = allergen.capitalize()
-                allergens.append(allergen)
+                allergen = key.replace("AllergenDetails", "").capitalize()
+                allergens_list.append(allergen)
+        allergens = ", ".join(allergens_list)
 
-        allergens = ", ".join(allergens)
-
-        
-
+        # Promotion description
         promotion_description = ""
-        if quantityPrice:
-            promotion_description = f"{quantityPrice} vanaf {quantityPriceQuantity} st"
+        if quantity_price:
+            promotion_description = f"{quantity_price} vanaf {quantity_price_quantity} st"
 
-        item = {
-            "unique_id": unique_id,
-            "product_unique_key": f"{unique_id}P",
-            "competitor_name": "colruyt",
-            "extraction_date": EXTRACTION_DATE,
-            "product_name": product_name,
-            "brand": brand,
-            "grammage_quantity": grammage_quantity,
-            "grammage_unit": grammage_unit,
-            "breadcrumb": breadcrumb,
-            "pdp_url": str(payload.get('pdp_url', '')),
-            "regular_price": regular_price,
-            "selling_price": selling_price,
-            "promotion_valid_from": promotion_valid_from if promotion_valid_from else "",
-            "promotion_valid_upto": promotion_valid_upto if promotion_valid_upto else "",
-            "price_valid_from": price_valid_from if price_valid_from else "",
-            "price_per_unit": price_per_unit if price_per_unit else "",
-            "currency": "EUR",
-            "product_description": description,
-            "image_url_1": image_url_1,
-            "file_name_1":"",
-            "instock": str(payload.get('isAvailable', '')),
-            "country_of_origin": country_of_origin,
-            "allergens": allergens,
-            "promotion_description": promotion_description,
-            "site_shown_uom": content,
-            # Include base crawler payload
-         
-            "measurementUnitQuantityPrice": str(payload.get('measurementUnitQuantityPrice', '')),
-            "measurementUnitPrice": str(payload.get('measurementUnitPrice', '')),
-            "measurementUnit": str(payload.get('measurementUnit', '')),
-            "pricePerUOM": str(payload.get('pricePerUOM', '')),
-            "techPromoId": str(payload.get('techPromoId', '')),
-            "promotionId": str(payload.get('promotionId', '')),
-            # Appended detail JSON
-            "product_details": json.dumps(product_details),
-            # "promotion_details": json.dumps(promotion_details)
-        }
+        # 4. Dictionary Assignment
+        item = {}
+        item['unique_id'] = unique_id
+        item['product_unique_key'] = f"{unique_id}P"
+        item['competitor_name'] = "colruyt"
+        item['extraction_date'] = EXTRACTION_DATE
+        item['product_name'] = product_name
+        item['brand'] = brand
+        item['grammage_quantity'] = grammage_quantity
+        item['grammage_unit'] = grammage_unit
+        item['breadcrumb'] = breadcrumb
+        item['pdp_url'] = pdp_url
+        item['regular_price'] = regular_price
+        item['selling_price'] = selling_price
+        item['promotion_valid_from'] = pub_start
+        item['promotion_valid_upto'] = pub_end
+        item['price_valid_from'] = pub_start
+        item['price_per_unit'] = price_per_unit
+        item['currency'] = "EUR"
+        item['product_description'] = description
+        item['image_url_1'] = full_image
+        item['file_name_1'] = ""
+        item['instock'] = is_available
+        item['country_of_origin'] = detail_origin
+        item['allergens'] = allergens
+        item['promotion_description'] = promotion_description
+        item['site_shown_uom'] = content
+        
+        # Base crawler fields
+        item['measurementUnitQuantityPrice'] = measurement_unit_quantity_price
+        item['measurementUnitPrice'] = measurement_unit_price_payload
+        item['measurementUnit'] = measurement_unit
+        item['pricePerUOM'] = price_per_uom
+        item['techPromoId'] = tech_promo_id
+        item['promotionId'] = promotion_id
         
         # Map hierarchy levels
         for i, value in enumerate(levels, start=1):
@@ -256,6 +283,20 @@ class Parser:
                 item[f"producthierarchy_level{i}"] = value
 
         try:
+            # 5. Save Raw Response
+            if product_details:
+                raw_item = {
+                    "unique_id": unique_id,
+                    "product_details": product_details,
+                    "extraction_date": EXTRACTION_DATE
+                }
+                self.raw_collection.update_one(
+                    {"unique_id": unique_id},
+                    {"$set": raw_item},
+                    upsert=True
+                )
+                logger.info(f"    Raw saved: {unique_id}")
+
             # Instantiate MongoEngine document (schema validation only)
             product_item = ProductDataItem(**item)
             product_item.validate()
