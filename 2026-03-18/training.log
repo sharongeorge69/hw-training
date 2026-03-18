@@ -1,0 +1,9 @@
+Executed a comprehensive rework of the Colruyt dataset and standardized the crawler's codebase to improve modularity and long-term maintenance.
+
+Participated in a technical briefing to resolve implementation blockers, specifically focusing on session persistence and handling asynchronous API responses.
+
+Attended a coordination meeting to clarify doubts regarding the Quality Assurance checklist, ensuring all team members are aligned on the validation criteria for pricing and promotion accuracy.
+
+Performed a detailed Quality Assurance review on datasets provided by team members, auditing for record completeness and verifying that the promotion logic is firing correctly across all product categories.
+
+
