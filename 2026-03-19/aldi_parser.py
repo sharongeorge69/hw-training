@@ -112,7 +112,6 @@ class Parser:
         PRODUCT_DESCRIPTION_XPATH = "normalize-space(//div[contains(@class,'rte')]//p)"
         PREVIOUS_PRICE_XPATH = "normalize-space(//s[contains(@class,'price__previous')])"
         CURRENT_PRICE_XPATH = "normalize-space(//span[contains(@class,'price__wrapper')])"
-        BREADCRUMBS_XPATH = "//ol[contains(@class,'mod-breadcrumb__nav')]//li//span/text()"
         IMAGE_XPATH = "//div[contains(@class,'mod-gallery-article__stage')]//a[contains(@class,'has-lightbox')]/@href"
         PROMOTION_DESCRIPTION_XPATH = "normalize-space(//div[contains(@class,'price')]//span[contains(@class,'price__previous-percentage')])"
 
