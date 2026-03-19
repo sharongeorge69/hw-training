@@ -29,43 +29,53 @@ class Crawler:
         logger.info("Connected to MongoDB") 
 
     def parse_item(self, response_text, url):
-        selector = Selector(text=response_text)
-        snippet_urls = selector.xpath("//div[@data-tile-url]/@data-tile-url").getall()
+        if not response_text:
+            logger.error(f"Received empty response text for {url}")
+            return False
 
-        base = "https://www.aldi.be"
-        
-        # Extract the category path for the hash, e.g., /nl/producten/assortiment/...
-        category_hash = ""
-        category_hash = url.split("aldi.be")[1].replace(".html", "")
+        try:
+            selector = Selector(text=response_text)
+            snippet_urls = selector.xpath("//div[@data-tile-url]/@data-tile-url").getall()
 
-        found_count = 0
-        saved_count = 0
-        
-        for snippet_url in snippet_urls:
-            match = re.search(r"snippet-(.*)\.shoppinglisttile", snippet_url)
-            if match:
-                product_id = match.group(1)
-                
-                # The product text doesn't matter for the backend, just the ID
-                final_url = f"{base}/nl/p/artikel-{product_id}.article.html#{category_hash}"
-                item = {}
-                item["pdp_url"] = final_url
-                item["category_url"] = url
-                item["product_id"] = product_id
-                
-                found_count += 1
-                try:
-                    response_item = ResponseURLItem(**item)
-                    response_item.validate()
-                    self.url_collection.insert_one(item)
-                    saved_count += 1
-                except pymongo.errors.DuplicateKeyError:
-                    pass
-                except Exception as e:
-                    logger.error(f"  Save error for {final_url}: {e}")
+            if not snippet_urls:
+                logger.warning(f"No products found on {url}")
+                return False
+
+            base = "https://www.aldi.be"
+            category_hash = url.split("aldi.be")[1].replace(".html", "")
+
+            found_count = 0
+            saved_count = 0
+            
+            for snippet_url in snippet_urls:
+                match = re.search(r"snippet-(.*)\.shoppinglisttile", snippet_url)
+                if match:
+                    product_id = match.group(1)
                     
-        logger.info(f"Found {found_count} products, Saved {saved_count} new products.")
-        return True
+                    # The product text doesn't matter for the backend, just the ID
+                    final_url = f"{base}/nl/p/artikel-{product_id}.article.html#{category_hash}"
+                    item = {}
+                    item["pdp_url"] = final_url
+                    item["category_url"] = url
+                    item["product_id"] = product_id
+                    
+                    found_count += 1
+                    try:
+                        response_item = ResponseURLItem(**item)
+                        response_item.validate()
+                        self.url_collection.insert_one(item)
+                        saved_count += 1
+                    except pymongo.errors.DuplicateKeyError:
+                        pass
+                    except Exception as e:
+                        logger.error(f"  Save error for {final_url}: {e}")
+                        
+            logger.info(f"Found {found_count} products, Saved {saved_count} new products.")
+            return True
+
+        except Exception as e:
+            logger.error(f"Error parsing items from {url}: {e}")
+            return False
 
     def start(self):
         target_urls = [
@@ -85,9 +95,11 @@ class Crawler:
                     response = requests.get(url, headers=self.headers, timeout=10)
                     
                     if response.status_code == 200:
-                        self.parse_item(response.text, url)
-                        success = True
-                        break
+                        if self.parse_item(response.text, url):
+                            success = True
+                            break
+                        else:
+                            logger.error(f"  Parsing failed for {url} on attempt {attempt + 1}")
                     else:
                         logger.warning(f"  Attempt {attempt + 1} failed for {url} with status code {response.status_code}")
                         
