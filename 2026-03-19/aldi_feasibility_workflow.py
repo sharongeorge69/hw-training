@@ -32,6 +32,8 @@ headers = {
     }
 url = "https://www.aldi.be/nl/p/energydrink-120-1-0.article.html#/nl/producten/assortiment/alcoholvrije-dranken/energy-drinks-sportdrank"
 response = requests.get(url, headers=headers)
+
+unique_id = re.search(r"artikel-(\d+-\d+-\d+)\.article\.html", url)
 brand = sel.xpath(
     "//span[contains(@class,'mod-article-intro__header-headline-small')]/text()"
 ).get()
