@@ -228,7 +228,7 @@ class Parser:
         item['producthierarchy_level6'] = level6
         
         try:
-            Save Raw Response
+            #Save Raw Response
             raw_item = {
                 "unique_id": unique_id,
                 "html_content": html_content,
