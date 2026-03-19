@@ -35,7 +35,7 @@ response = requests.get(url, headers=headers)
 
 unique_id = re.search(r"artikel-(\d+-\d+-\d+)\.article\.html", url)
 brand = sel.xpath(
-    "//span[contains(@class,'mod-article-intro__header-headline-small')]/text()"
+    "normalize-space(//span[contains(@class,'mod-article-intro__header-headline-small')])"
 ).get()
 
 
@@ -53,7 +53,9 @@ regular_price = sel.xpath(
 selling_price = sel.xpath(
     "normalize-space(//div[contains(@class,'price')]//span[contains(@class,'price__wrapper')])"
 ).get()
-
+price_per_unit = sel.xpath(
+    "normalize-space(//span[contains(@class,'price__unit')])"
+).get()
 grammage_quantity = sel.xpath(
     "normalize-space(//span[contains(@class,'price__unit')])"
 ).get()
@@ -67,3 +69,4 @@ currency = "EUR"
 image = sel.xpath(
     "//div[contains(@class,'mod-gallery-article__stage')]//a[contains(@class,'has-lightbox')]/@href"
 ).get()
+promotion_description = sel.xpath("normalize-space(//div[contains(@class,'price')]//span[contains(@class,'price__previous-percentage')])").get()
