@@ -1,2 +1,11 @@
-Reasearch
+Initiated a comprehensive feasibility study for the Aldi platform, mapping out the site’s hierarchical data structure and evaluating the technical requirements for stable, long-term extraction.
+
+Concluded the Aldi feasibility assessment by defining the optimal scraping workflow and establishing the data schema for product attributes.
+
+Commenced the core development of the Aldi crawler.
+
+Started the development of a specialized parser for Aldi, focusing on extracting structured fields
+
+
+
 
