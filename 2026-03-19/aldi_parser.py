@@ -228,17 +228,17 @@ class Parser:
         item['producthierarchy_level6'] = level6
         
         try:
-            # Save Raw Response
-            # raw_item = {
-            #     "unique_id": unique_id,
-            #     "html_content": html_content,
-            #     "extraction_date": EXTRACTION_DATE
-            # }
-            # self.raw_collection.update_one(
-            #     {"unique_id": unique_id},
-            #     {"$set": raw_item},
-            #     upsert=True
-            # )
+            Save Raw Response
+            raw_item = {
+                "unique_id": unique_id,
+                "html_content": html_content,
+                "extraction_date": EXTRACTION_DATE
+            }
+            self.raw_collection.update_one(
+                {"unique_id": unique_id},
+                {"$set": raw_item},
+                upsert=True
+            )
 
             # Schema validation and save
             product_item = ProductDataItem(**item)
