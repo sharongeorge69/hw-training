@@ -1,0 +1,14 @@
+Engineered the core parsing logic for the Aldi project
+
+https://www.intermarche.be
+https://www.lidl.be
+https://www.spar.be
+Conducted a site count task to verify the total volume of extractable product listings, ensuring the crawler's coverage aligns with the project’s scope.
+
+Developed and executed specialized extraction scripts to pull a targeted sample dataset from JioMart(at location 600056), validating the accuracy of recent code updates.
+
+Performed a final review of the extracted datasets, resolving minor formatting inconsistencies to ensure the data is production-ready.
+
+Conducted a secondary QA audit on datasets processed by team members, verifying field accuracy and identifying any remaining logic gaps.
+
+
