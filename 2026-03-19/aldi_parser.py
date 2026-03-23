@@ -166,14 +166,8 @@ class Parser:
         level5 = ""
         if "limonades" in pdp_url.lower():
             level5 = "LIMONADES"
-        elif "energy-drinks-sportdrank" in pdp_url.lower():
+        if "energy-drinks-sportdrank" in pdp_url.lower():
             level5 = "ENERGY DRINKS EN SPORTDRANK"
-        else:
-            # Fallback/Default handling for other categories
-            if "#" in pdp_url:
-                hash_part = pdp_url.split("#")[1]
-                last_slug = hash_part.strip("/").split("/")[-1]
-                level5 = last_slug.replace("-", " ").upper()
 
         level6 = str(product_name).upper() if product_name else ""
         
@@ -216,7 +210,7 @@ class Parser:
             if i <= 6:
                 item[f'image_url_{i}'] = url    
 
-        # Map hierarchy levels (Hardcoded)
+        # Map hierarchy levels
         item['producthierarchy_level1'] = level1
         item['producthierarchy_level2'] = level2
         item['producthierarchy_level3'] = level3
