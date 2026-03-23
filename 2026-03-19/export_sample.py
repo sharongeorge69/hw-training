@@ -147,19 +147,15 @@ CSV_HEADERS = [
 ]
 
 def format_price(price):
-    """Ensure 2 decimal places (e.g., 1.2 -> 1.20) without rounding incorrectly."""
     try:
         if price and str(price).strip():
-            # Handle float or string with comma/Euro
-            p_val = str(price).replace('€', '').replace(',', '.').strip()
-            val = float(p_val)
+            val = float(price)
             return f"{val:.2f}"
     except (ValueError, TypeError):
         pass
     return ""
 
 def clean_brand(brand):
-    """Remove registration mark and trim whitespace."""
     if not brand:
         return ""
     return str(brand).replace('®', '').strip()
