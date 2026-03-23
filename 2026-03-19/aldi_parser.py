@@ -39,7 +39,6 @@ class Parser:
         logger.info("Connected to MongoDB")
 
     def fetch_product_details(self, url):
-        """Fetch full product page HTML with retry logic."""
         max_retries = 3
         for attempt in range(max_retries):
             try:                
@@ -66,7 +65,6 @@ class Parser:
         return None
 
     def start(self):
-        """Read crawler payload from MongoDB and parse each item."""
         total = self.url_collection.count_documents({})
         logger.info(f"Total items to parse: {total}")
 
@@ -101,7 +99,6 @@ class Parser:
             self.parse_item(pdp_url, unique_id, html_content)
 
     def parse_item(self, pdf_url, unique_id, html_content):
-        """Extract fields using XPaths and save to MongoDB."""
         sel = Selector(text=html_content)
         
         # XPaths
@@ -110,8 +107,8 @@ class Parser:
         SITE_SHOWN_UOM_XPATH = "normalize-space(//span[contains(@class,'price__unit')])"
         PRICE_PER_UNIT_XPATH = "normalize-space(//span[contains(@class,'price__base')])"
         PRODUCT_DESCRIPTION_XPATH = "normalize-space(//div[contains(@class,'rte')]//p)"
-        PREVIOUS_PRICE_XPATH = "normalize-space(//s[contains(@class,'price__previous')])"
-        CURRENT_PRICE_XPATH = "normalize-space(//span[contains(@class,'price__wrapper')])"
+        REGULAR_PRICE_XPATH = "normalize-space(//s[contains(@class,'price__previous')])"
+        SELLING_PRICE_XPATH = "normalize-space(//span[contains(@class,'price__wrapper')])"
         IMAGE_XPATH = "//div[contains(@class,'mod-gallery-article__stage')]//a[contains(@class,'has-lightbox')]/@href"
         PROMOTION_DESCRIPTION_XPATH = "normalize-space(//div[contains(@class,'price')]//span[contains(@class,'price__previous-percentage')])"
 
@@ -124,7 +121,7 @@ class Parser:
         site_shown_uom = sel.xpath(SITE_SHOWN_UOM_XPATH).extract_first()
         price_per_unit = sel.xpath(PRICE_PER_UNIT_XPATH).extract_first()
         
-        # Clean price_per_unit (e.g., 3.50/l -> 3.50)
+        # Clean price_per_unit
         if price_per_unit:
             match = re.search(r'([\d,.]+)', price_per_unit)
             if match:
@@ -146,26 +143,26 @@ class Parser:
                 grammage_quantity = site_shown_uom
 
         # Price Logic
-        previous_price = sel.xpath(PREVIOUS_PRICE_XPATH).extract_first()
-        current_price = sel.xpath(CURRENT_PRICE_XPATH).extract_first()
+        regular_price = sel.xpath(REGULAR_PRICE_XPATH).extract_first()
+        selling_price = sel.xpath(SELLING_PRICE_XPATH).extract_first()
         
         price_was = ""
-        if previous_price:
-            regular_price = previous_price
-            selling_price = current_price
+        if regular_price:
+            regular_price = regular_price
+            selling_price = selling_price
             price_was = regular_price
         else:
-            regular_price = current_price
-            selling_price = current_price
+            regular_price = selling_price
+            selling_price = selling_price
             price_was = ""
 
-        # Breadcrumb logic (Hardcoded as per user request)
+        # Breadcrumb logic
         level1 = "STARTPAGINA"
         level2 = "PRODUCTEN"
         level3 = "ASSORTIMENT"
         level4 = "ALCOHOLVRIJE DRANKEN"
         
-        # Determine Level 5 from URL
+        # Level 5 from URL
         level5 = ""
         if "limonades" in pdp_url.lower():
             level5 = "LIMONADES"
@@ -228,17 +225,17 @@ class Parser:
         item['producthierarchy_level6'] = level6
         
         try:
-            #Save Raw Response
-            raw_item = {
-                "unique_id": unique_id,
-                "html_content": html_content,
-                "extraction_date": EXTRACTION_DATE
-            }
-            self.raw_collection.update_one(
-                {"unique_id": unique_id},
-                {"$set": raw_item},
-                upsert=True
-            )
+            # Save Raw Response
+            # raw_item = {
+            #     "unique_id": unique_id,
+            #     "html_content": html_content,
+            #     "extraction_date": EXTRACTION_DATE
+            # }
+            # self.raw_collection.update_one(
+            #     {"unique_id": unique_id},
+            #     {"$set": raw_item},
+            #     upsert=True
+            # )
 
             # Schema validation and save
             product_item = ProductDataItem(**item)
