@@ -1,0 +1,11 @@
+Engineered the initial logic for a targeted sample data extraction of the Aldi platform, focusing on capturing a diverse range of product categories to validate parser accuracy.
+
+Completed and optimized the specialized extraction script, incorporating refined error handling and session management to ensure a seamless data pull.
+
+Developed a comprehensive Quality Assurance (QA) sheet and performed a rigorous self-audit on the Aldi sample data to verify field mapping and data types.
+
+Conducted a detailed Quality Assurance review on datasets provided by team members, identifying structural inconsistencies and providing actionable feedback for correction.
+
+Executed a final validation check on reworked datasets to ensure that all previously identified QA issues were successfully resolved and that the data meets production standards.
+
+
