@@ -80,9 +80,9 @@ class Parser:
             # XPATH
             PRODUCT_NAME_XPATH = '//div[@id="pdp_product_name"]//text()'
             BRAND_XPATH = '//div[@class="product-header-brand-text"]//a[@id="top_brand_name"]/text()'
-            PRODUCTHIERARCHY_LEVEL1_XPATH = "(//ul[@class='jm-breadcrumbs-list']/li)[1]/a/text()"
-            PRODUCTHIERARCHY_LEVEL2_XPATH = "(//ul[@class='jm-breadcrumbs-list']/li)[2]/a/text()"
-            PRODUCTHIERARCHY_LEVEL3_XPATH = "(//ul[@class='jm-breadcrumbs-list']/li)[3]/a/text()"
+            PRODUCTHIERARCHY_LEVEL1_XPATH = '(//ul[@class="jm-breadcrumbs-list"]/li)[1]/a/text()'
+            PRODUCTHIERARCHY_LEVEL2_XPATH = '(//ul[@class="jm-breadcrumbs-list"]/li)[2]/a/text()'
+            PRODUCTHIERARCHY_LEVEL3_XPATH = '(//ul[@class="jm-breadcrumbs-list"]/li)[3]/a/text()'
             PACKAGE_SIZEOF_SELLINGPRICE_XPATH = '//tr[th[contains(text(), "Pack Of")]]/td/text()'
             BREADCRUMB_LIST_XPATH = '//ul[@class="jm-breadcrumbs-list"]//a/text()'
             DESC_NODES_XPATH = "//div[@id='pdp_description']//text()[not(ancestor::button) and not(ancestor::style) and not(ancestor::script)]"
@@ -228,7 +228,7 @@ class Parser:
                                 article_id = alt_code_texts[0]
                             buybox_mrp = attributes.get("buybox_mrp", {}).get("text", [])
                             # Search for TXCF in buybox_mrp
-                            txcf_data = next((entry for entry in buybox_mrp if entry.startswith("TXCF|")), None)
+                            txcf_data = next((entry for entry in buybox_mrp if entry.startswith("T1IP|")), None)
                             if not txcf_data:
                                 # Fallback
                                 txcf_data = next((entry for entry in buybox_mrp if "|" in entry and len(entry.split("|")) > 5), None)
@@ -292,7 +292,9 @@ class Parser:
                 import copy
                 payload = copy.deepcopy(json_data_instock)
                 if payload.get("articles") and len(payload["articles"]) > 0:
-                    payload["articles"][0]["article_id"] = article_id or alternate_id or unique_id
+                    url_id = pdp_url.rstrip("/").split("/")[-1] if pdp_url else ""
+                    payload["articles"][0]["article_id"] = article_id
+                    logger.debug(f"Instock check — article_id={article_id!r}, alternate_id={alternate_id!r}, url_id={url_id!r}, using={payload['articles'][0]['article_id']!r}")
                 
                 instock_url = "https://www.jiomart.com/platform/logistics/api/v1/promise"
                 instock_resp = requests.post(
