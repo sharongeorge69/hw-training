@@ -50,7 +50,7 @@ class Crawler:
                     break
 
                 data = response.json()
-                if not self.save_products(data):
+                if not self.parse_item(data):
                     break
 
                 next_page_token = data.get("nextPageToken")
@@ -65,7 +65,7 @@ class Crawler:
                 logger.error(f"Pagination error at page {page_count}: {e}")
                 break
 
-    def save_products(self, data):
+    def parse_item(self, data):
         results = data.get("results", [])
         if not results:
             return False
