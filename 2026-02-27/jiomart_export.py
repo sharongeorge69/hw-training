@@ -166,18 +166,23 @@ def export_data():
 
                 row = {}
                 for header in csv_headers:
-                    val = doc.get(header, "")
-                    if val is None:
-                        val = ""
-                    
+                    val = doc.get(header, "") or ""
                     val_str = str(val).strip()
+
+                    # Handle common "empty" strings
                     if val_str.lower() in ["na", "none"]:
                         val_str = ""
-                    
-                    # Clean the product description
+
+                    # Global clean: Replace non-breaking spaces with space and remove BOM
+                    val_str = val_str.replace('\xa0', ' ').replace('\ufeff', '')
+
+                    # Special handling for instock
+                    if header == "instock":
+                        val_str = "True"
+
                     if header == "product_description":
-                        # Replace \xa0 with space, remove newlines, collapse multiple spaces, remove zero-width space
-                        val_str = val_str.replace('\xa0', ' ').replace('\u200b', '')
+                        # remove newlines, collapse multiple spaces, remove zero-width space
+                        val_str = val_str.replace('\u200b', '')
                         val_str = re.sub(r'[\r\n]+', ' ', val_str)
                         val_str = re.sub(r'\s{2,}', ' ', val_str).strip()
                         
