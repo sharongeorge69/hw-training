@@ -1,0 +1,11 @@
+Conducted a deep-dive feasibility study of the Next.co.uk product architecture.
+
+Participated in the daily project meeting to resolve implementation hurdles, clarify data schema requirements, and align on the technical approach for the Next.co.uk crawler and parser.
+
+Engineered and tested robust pagination logic to handle deep-nested product listings, ensuring the crawler successfully navigates through all result pages without missing records.
+
+Validated the internal API endpoints responsible for product social proof, verifying that aggregate ratings and individual review counts are correctly captured and mapped to their respective SKUs.
+
+Utilized Playwright to perform advanced block-checking.
+
+
