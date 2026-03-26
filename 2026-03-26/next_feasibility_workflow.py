@@ -90,6 +90,17 @@ headers = {
     'upgrade-insecure-requests': '1',
     'user-agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/145.0.0.0 Safari/537.36',
 }
+
+################## C A T E G O R Y #######################
+
+response = requests.get('https://www.next.co.uk/women', cookies=cookies,headers=headers, impersonate = "chrome110")
+sel = Selector(text=response.text)
+rating = sel.xpath("//label[text()='CLOTHING']/following-sibling::div//a/@href").getall()
+
+
+
+
+################### C R A W L E R #######################
 # change params for pagination
 params = {
     'p': '1',
@@ -136,7 +147,27 @@ options = product_data.get("options", {}).get("options", [])
 size = options[0].get("value", [])
 instock = options[0].get("stockStatus", [])
 
+# rating and review count are loaded from an api
 
+ # Site-specific passkey for Next.co.uk Bazaarvoice data
+PASSKEY = "caU0xNxR6P7SE6qUePNHXA23s6WTnRqX2TIYz8HEtSzcw"
+    
+# URL for statistics (total reviews, average rating)
+url = "https://api.bazaarvoice.com/data/statistics.json"
+    
+params = {
+        "apiversion": "5.4",
+        "passkey": PASSKEY,
+        "Filter": f"ProductId:{product_id}",
+        "Stats": "Reviews"
+    }
+
+response = requests.get(url, params=params)
+response.raise_for_status()
+data = response.json()
+stats = data["Results"][0].get("ProductStatistics", {}).get("ReviewStatistics", {})
+reviews = stats.get("TotalReviewCount", 0)
+rating = stats.get("AverageOverallRating", 0)
 
 
 ###################### F I N D I N G S #######################
