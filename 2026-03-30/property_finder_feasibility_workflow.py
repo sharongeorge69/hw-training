@@ -67,3 +67,15 @@ response = requests.get(
 data = response.json()
 
 transactions = data['pageProps']['list']['transactionList']
+
+
+################# FINDINGS ####################
+
+#filter applying logic
+
+#1. make request to the Location Discovery API (https://www.propertyfinder.ae/api/pwa/location/list?l_t=TOWER%2CSUBCOMMUNITY%2CCOMMUNITY&c=1&locale=en) to extract the slugs required to slice the transactions by location
+#2. make request to the transaction API  endpoint = f"https://www.propertyfinder.ae/dataguru/_next/data/{build_id}/en/transactions/{category}/dubai/{SLUG}.json"
+#3. if the totalTransactionCount is greater than 500 make request to the transaction API with different filter parameters (Property Type, Bedrooms, Price Range, etc) to get the transactions in batches
+
+
+
