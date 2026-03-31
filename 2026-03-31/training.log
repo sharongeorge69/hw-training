@@ -1,0 +1,15 @@
+Conducted a structural analysis of the PropertyFinder platform to identify data hierarchies, XHR patterns, and the most efficient entry points for property listing extraction.
+
+Participated in a technical sync to define project milestones for the week and coordinate the transition between active scraping assignments.
+
+Commenced the initial development phase for PropertyFinder, setting up the project environment and establishing the core request-handling logic.
+
+Attended a specialized session on using Camoufox, an anti-bot browser solution, to enhance crawler stealth by mimicking authentic TLS fingerprints and browser headers.
+
+Engaged in a handover meeting to resume lead development on the JioMart site, focusing on updated requirements and site-specific extraction targets.
+
+Implemented and executed targeted extraction logic to pull product data across specific geographic locations in India, ensuring regional pricing and availability accuracy.
+
+Completed the production run for the JioMart dataset and performed a comprehensive QA audit to verify that all location-specific records met the required data integrity standards
+
+
