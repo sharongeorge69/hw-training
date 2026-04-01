@@ -95,7 +95,7 @@ headers = {
 
 response = requests.get('https://www.next.co.uk/women', cookies=cookies,headers=headers, impersonate = "chrome110")
 sel = Selector(text=response.text)
-rating = sel.xpath("//label[text()='CLOTHING']/following-sibling::div//a/@href").getall()
+category = sel.xpath("//label[text()='CLOTHING']/following-sibling::div//a/@href").getall()
 
 
 
