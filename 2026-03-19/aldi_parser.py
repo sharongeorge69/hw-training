@@ -96,9 +96,9 @@ class Parser:
                 )
                 continue
 
-            self.parse_item(pdp_url, unique_id, html_content)
+            self.parse_item(pdp_url, html_content)
 
-    def parse_item(self, pdp_url, unique_id, html_content):
+    def parse_item(self, pdp_url, html_content):
         sel = Selector(text=html_content)
         
         # XPaths
