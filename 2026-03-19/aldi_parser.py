@@ -6,7 +6,7 @@ import requests
 from parsel import Selector
 from pymongo import MongoClient
 from settings import (
-    MONGO_URI, MONGO_DB,
+    MONGO_URI, MONGO_DB, MONGO_RAW_RESPONSE_DB,
     MONGO_COLLECTION_RESPONSE, MONGO_COLLECTION_DATA,
     MONGO_COLLECTION_RAW_RESPONSE, MONGO_COLLECTION_URL_FAILED,
     headers, EXTRACTION_DATE
@@ -28,9 +28,10 @@ class Parser:
         # PyMongo connection
         self.client = MongoClient(MONGO_URI)
         self.db = self.client[MONGO_DB]
+        self.raw_db = self.client[MONGO_RAW_RESPONSE_DB]
         self.url_collection = self.db[MONGO_COLLECTION_RESPONSE]
         self.product_collection = self.db[MONGO_COLLECTION_DATA]
-        self.raw_collection = self.db[MONGO_COLLECTION_RAW_RESPONSE]
+        self.raw_collection = self.raw_db[MONGO_COLLECTION_RAW_RESPONSE]
         self.failed_url_collection = self.db[MONGO_COLLECTION_URL_FAILED]
         
         # Create indexes
@@ -45,7 +46,6 @@ class Parser:
                 resp = requests.get(url, headers=self.headers, timeout=20)
                 
                 if resp.status_code == 200:
-
                     return resp.text
                 elif resp.status_code == 404:
                     logger.error(f"  Product not found (404): {url}")
@@ -98,7 +98,7 @@ class Parser:
 
             self.parse_item(pdp_url, unique_id, html_content)
 
-    def parse_item(self, pdf_url, unique_id, html_content):
+    def parse_item(self, pdp_url, unique_id, html_content):
         sel = Selector(text=html_content)
         
         # XPaths
@@ -129,7 +129,7 @@ class Parser:
 
         product_description = sel.xpath(PRODUCT_DESCRIPTION_XPATH).extract_first()
         promotion_description = sel.xpath(PROMOTION_DESCRIPTION_XPATH).extract_first()
-        pdp_url = pdf_url
+        pdp_url = pdp_url
 
         # Grammage Logic
         grammage_quantity = ""
