@@ -112,6 +112,17 @@ class Parser:
         IMAGE_XPATH = "//div[contains(@class,'mod-gallery-article__stage')]//a[contains(@class,'has-lightbox')]/@href"
         PROMOTION_DESCRIPTION_XPATH = "normalize-space(//div[contains(@class,'price')]//span[contains(@class,'price__previous-percentage')])"
 
+         # Unique ID Logic
+        unique_id = ""
+        script = sel.xpath("//script[contains(text(),'digitalData')]/text()").get()
+        if script:
+            json_str = re.search(r'digitalData\s*=\s*(\{.*?\});', script, re.S).group(1)
+            data = json.loads(json_str)
+            page_name = data["page"]["pageInfo"]["pageName"]
+            extracted_id = re.search(r'Product Detail:(\d+)', page_name).group(1)
+            if extracted_id:
+                unique_id = extracted_id
+
         # Basic Fields
         product_name = sel.xpath(PRODUCT_NAME_XPATH).extract_first()
         brand = sel.xpath(BRAND_XPATH).extract_first()
@@ -120,12 +131,8 @@ class Parser:
         competitor_name = "aldi"
         site_shown_uom = sel.xpath(SITE_SHOWN_UOM_XPATH).extract_first()
         price_per_unit = sel.xpath(PRICE_PER_UNIT_XPATH).extract_first()
-        
-        # Clean price_per_unit
-        if price_per_unit:
-            match = re.search(r'([\d,.]+)', price_per_unit)
-            if match:
-                price_per_unit = match.group(1)
+         if price_per_unit:
+            price_per_unit = price_per_unit.strip()
 
         product_description = sel.xpath(PRODUCT_DESCRIPTION_XPATH).extract_first()
         promotion_description = sel.xpath(PROMOTION_DESCRIPTION_XPATH).extract_first()
