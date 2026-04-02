@@ -5,7 +5,7 @@ from pymongo import MongoClient
 import pymongo
 
 # Local imports
-from settings import HEADERS, PARAMS, MONGO_URI, MONGO_DB, MONGO_COLLECTION_LOCATIONS, EXTRACTION_DATE
+from settings import HEADERS, PARAMS, MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, EXTRACTION_DATE
 from items import LocationItem
 
 # Configure Logging
@@ -23,7 +23,7 @@ class Crawler:
         # MongoDB connection
         self.client = MongoClient(MONGO_URI)
         self.db = self.client[MONGO_DB]
-        self.location_collection = self.db[MONGO_COLLECTION_LOCATIONS]
+        self.location_collection = self.db[MONGO_COLLECTION_RESPONSE]
         
         # Create unique index to avoid duplicates
         self.location_collection.create_index("s", unique=True)
