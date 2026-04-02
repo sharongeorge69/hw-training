@@ -9,7 +9,7 @@ import pymongo
 
 # Local
 from settings import (
-    MONGO_URI, MONGO_DB, MONGO_COLLECTION_TRANSACTIONS,
+    MONGO_URI, MONGO_DB, MONGO_COLLECTION_DATA,
     EXTRACTION_DATE, SLICER_PROPERTY_TYPES, SLICER_BEDROOMS,
     SLICER_PRICES, SLICER_AREAS
 )
@@ -30,7 +30,7 @@ class Parser:
         # MongoDB connection
         self.client = MongoClient(MONGO_URI)
         self.db = self.client[MONGO_DB]
-        self.transactions_collection = self.db[MONGO_COLLECTION_TRANSACTIONS]
+        self.transactions_collection = self.db[MONGO_COLLECTION_DATA]
 
         logger.info("Connected to MongoDB")
         
