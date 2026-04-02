@@ -7,7 +7,7 @@ import os
 # Add parent directory to path to allow absolute imports if run from inside property_finder dir
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from settings import MONGO_URI, MONGO_DB, MONGO_COLLECTION_TRANSACTIONS, FILE_NAME_FULLDUMP, EXPORT_LIMIT
+from settings import MONGO_URI, MONGO_DB, MONGO_COLLECTION_DATA, FILE_NAME_FULLDUMP, EXPORT_LIMIT
 
 # Configure logging
 logging.basicConfig(
@@ -51,9 +51,9 @@ def export_data():
     try:
         client = MongoClient(MONGO_URI)
         db = client[MONGO_DB]
-        collection = db[MONGO_COLLECTION_TRANSACTIONS]
+        collection = db[MONGO_COLLECTION_DATA]
         
-        logger.info(f"Connected to MongoDB. Exporting from {MONGO_COLLECTION_TRANSACTIONS}")
+        logger.info(f"Connected to MongoDB. Exporting from {MONGO_COLLECTION_DATA}")
         
         cursor = collection.find({}).limit(EXPORT_LIMIT)
         total_docs = collection.count_documents({})
