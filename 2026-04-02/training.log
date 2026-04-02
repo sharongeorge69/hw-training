@@ -1,0 +1,8 @@
+Researched the Camoufox browser—a specialized "hardened" version of Firefox—to evaluate its ability to mimic authentic TLS fingerprints and bypass advanced browser-side fingerprinting.
+
+Commenced a technical feasibility study for Moglix, analyzing the site's category tree and XHR requests.
+
+Performed a comprehensive refactoring of the PropertyFinder crawler.
+
+Formally started the development phase for the Moglix scraper.
+
