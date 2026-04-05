@@ -21,13 +21,11 @@ class Crawler:
         self.mongo_db_name = settings.MONGO_DB
         self.collection_name = settings.MONGO_COLLECTION_RESPONSE
         
-        # MongoDB connection using pymongo for direct execution
         try:
             self.client = MongoClient(self.mongo_uri)
             self.db = self.client[self.mongo_db_name]
             self.url_collection = self.db[self.collection_name]
             
-            # Create a unique index on pdp_url to prevent duplicate entries
             self.url_collection.create_index("pdp_url", unique=True)
             logger.info("Successfully connected to MongoDB and verified unique index.")
         except Exception as e:
@@ -41,8 +39,6 @@ class Crawler:
 
         try:
             selector = Selector(text=response_text)
-            # Correctly identify product links in the catalog/brand pages
-            # Most listing links follow the pattern: /product-name/mp/msncode
             product_links = selector.xpath('//a[contains(@href, "/mp/")]/@href').getall()
             
             if not product_links:
@@ -62,10 +58,8 @@ class Crawler:
                 else:
                     full_pdp_url = link
                 
-                # Cleanup: Remove query parameters for cleaner database entries
                 full_pdp_url = full_pdp_url.split('?')[0]
                 
-                # Prepare data following the ResponseURLItem structure
                 item_data = {
                     "pdp_url": full_pdp_url,
                     "category_name": category_name,
@@ -92,9 +86,6 @@ class Crawler:
             return 0
 
     def start(self):
-        """
-        Processes each category in settings.CATEGORY_LIST across all available pages.
-        """
         categories = settings.CATEGORY_LIST
         max_retries = 3
         
@@ -113,7 +104,6 @@ class Crawler:
                 
                 for attempt in range(max_retries):
                     try:
-                        # Use a generous timeout for potentially slow listing pages
                         response = requests.get(paginated_url, headers=self.headers, timeout=15)
                         
                         if response.status_code == 200:
@@ -136,12 +126,10 @@ class Crawler:
                     logger.error(f"Exhausted retries for {paginated_url}. Skipping category mapping.")
                     break
                 
-                # If zero products were extracted, we've likely hit the end of the listing
                 if products_count == 0:
                     logger.info(f"No more products found. Finished crawling {category_name}.")
                     break
                 
-                # Move to next page and pause slightly to manage load
                 page_index += 1
                 time.sleep(1)
 
