@@ -1,0 +1,23 @@
+PROJECT_NAME = "moglix"
+
+# Mongo db and collections
+MONGO_DB = f"{PROJECT_NAME}_db"
+MONGO_COLLECTION_RESPONSE = f"{PROJECT_NAME}_url"
+MONGO_COLLECTION_DATA = f"{PROJECT_NAME}_data"
+
+# MONGO_URI = "mongodb://127.0.0.1:27017/"
+MONGO_URI = "mongodb://mongotraining:a4892e52373844dc4862e6c468d11b6df7938e16@209.97.183.63:27017/?authSource=admin"
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+}
+
+CATEGORY_LIST = {
+    "Schneider_MCB": "https://www.moglix.com/brands/schneider-electric/electricals/circuit-breakers-fuses/mcb/211124500",
+    "L_&_T_MCB": "https://www.moglix.com/brands/l-t/electricals/circuit-breakers-fuses/mcb/211124500",
+    "Havells_MCB": "https://www.moglix.com/brands/havells/electricals/circuit-breakers-fuses/mcb/211124500",
+    "Legrand_MCB": "https://www.moglix.com/brands/legrand/electricals/circuit-breakers-fuses/mcb/211124500",
+    "Invt_VFD": "https://www.moglix.com/brands/invt/electricals/power-generation-transformers/variable-frequency-drives/211521900",
+    "Siemens_VFD": "https://www.moglix.com/brands/siemens/electricals/power-generation-transformers/variable-frequency-drives/211521900"
+}
