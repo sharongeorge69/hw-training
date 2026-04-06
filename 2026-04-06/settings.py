@@ -1,9 +1,16 @@
+from datetime import datetime
+import os
+
 PROJECT_NAME = "moglix"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # Mongo db and collections
 MONGO_DB = f"{PROJECT_NAME}_db"
 MONGO_COLLECTION_RESPONSE = f"{PROJECT_NAME}_url"
 MONGO_COLLECTION_DATA = f"{PROJECT_NAME}_data"
+MONGO_COLLECTION_RAW_RESPONSE = f"{PROJECT_NAME}_raw_response"
+MONGO_RAW_RESPONSE_DB = f"{PROJECT_NAME}_raw_response_db"
+MONGO_COLLECTION_URL_FAILED = f"{PROJECT_NAME}_url_failed"
 
 # MONGO_URI = "mongodb://127.0.0.1:27017/"
 MONGO_URI = "mongodb://mongotraining:a4892e52373844dc4862e6c468d11b6df7938e16@209.97.183.63:27017/?authSource=admin"
@@ -21,3 +28,7 @@ CATEGORY_LIST = {
     "Invt_VFD": "https://www.moglix.com/brands/invt/electricals/power-generation-transformers/variable-frequency-drives/211521900",
     "Siemens_VFD": "https://www.moglix.com/brands/siemens/electricals/power-generation-transformers/variable-frequency-drives/211521900"
 }
+
+EXTRACTION_DATE = datetime.now().strftime("%Y-%m-%d")
+FILE_NAME_FULLDUMP = os.path.join(BASE_DIR, f"{PROJECT_NAME}_{datetime.now().strftime('%Y_%m_%d')}_sample.json")
+EXPORT_LIMIT = 200
