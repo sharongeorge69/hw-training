@@ -1,10 +1,13 @@
 import logging
 import time
 import requests
+import pymongo
 from parsel import Selector
 from pymongo import MongoClient
-import pymongo
-import settings
+from settings import (
+    MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE,
+    headers, CATEGORY_LIST
+)
 from items import ResponseURLItem
 
 # Configure Logging
@@ -16,10 +19,10 @@ logger = logging.getLogger(__name__)
 
 class Crawler:
     def __init__(self):
-        self.headers = settings.headers
-        self.mongo_uri = settings.MONGO_URI
-        self.mongo_db_name = settings.MONGO_DB
-        self.collection_name = settings.MONGO_COLLECTION_RESPONSE
+        self.headers = headers
+        self.mongo_uri = MONGO_URI
+        self.mongo_db_name = MONGO_DB
+        self.collection_name = MONGO_COLLECTION_RESPONSE
         
         try:
             self.client = MongoClient(self.mongo_uri)
@@ -27,12 +30,12 @@ class Crawler:
             self.url_collection = self.db[self.collection_name]
             
             self.url_collection.create_index("pdp_url", unique=True)
-            logger.info("Successfully connected to MongoDB and verified unique index.")
+            logger.info("Connected to MongoDB")
         except Exception as e:
             logger.error(f"Failed to connect to MongoDB: {e}")
             raise
 
-    def parse_page(self, response_text, category_name, category_url):
+    def parse_item(self, response_text, category_name, category_url):
         if not response_text:
             logger.error(f"Received empty response content for {category_name}")
             return 0
@@ -47,36 +50,27 @@ class Crawler:
 
             found_on_page = 0
             saved_to_db = 0
-            
-            # Use a set to avoid duplicates within the same page
+
             unique_links = set(product_links)
             
-            for link in unique_links:
-                # Construct the absolute URL
-                if not link.startswith("http"):
-                    full_pdp_url = f"https://www.moglix.com{link}"
-                else:
-                    full_pdp_url = link
-                
-                full_pdp_url = full_pdp_url.split('?')[0]
-                
+            for link in unique_links:      
                 item_data = {
-                    "pdp_url": full_pdp_url,
+                    "pdp_url": link,
                     "category_name": category_name,
                     "category_url": category_url
                 }
                 
                 found_on_page += 1
                 try:
-                    item_validator = ResponseURLItem(**item_data)
-                    item_validator.validate()
+                    response_item = ResponseURLItem(**item_data)
+                    response_item.validate()
                     
                     self.url_collection.insert_one(item_data)
                     saved_to_db += 1
                 except pymongo.errors.DuplicateKeyError:
                     pass
                 except Exception as e:
-                    logger.error(f"Error saving product URL {full_pdp_url}: {e}")
+                    logger.error(f"Error saving product URL {link}: {e}")
             
             logger.info(f"[{category_name}] Products found: {found_on_page}, New products saved: {saved_to_db}")
             return found_on_page
@@ -86,7 +80,7 @@ class Crawler:
             return 0
 
     def start(self):
-        categories = settings.CATEGORY_LIST
+        categories = CATEGORY_LIST
         max_retries = 3
         
         logger.info(f"Starting Moglix crawl for {len(categories)} categories...")
@@ -107,7 +101,7 @@ class Crawler:
                         response = requests.get(paginated_url, headers=self.headers, timeout=15)
                         
                         if response.status_code == 200:
-                            products_count = self.parse_page(response.text, category_name, base_url)
+                            products_count = self.parse_item(response.text, category_name, base_url)
                             operation_success = True
                             break
                         else:
@@ -116,7 +110,7 @@ class Crawler:
                     except Exception as e:
                         logger.warning(f"  Attempt {attempt + 1}: Error for {paginated_url}: {e}")
                     
-                    # Exponential backoff strategy
+                    # Exponential backoff
                     if attempt < max_retries - 1:
                         backoff_seconds = 2 ** attempt
                         logger.info(f"  Waiting {backoff_seconds}s before retrying...")
@@ -131,7 +125,6 @@ class Crawler:
                     break
                 
                 page_index += 1
-                time.sleep(1)
 
     def close(self):
         try:
