@@ -1,0 +1,23 @@
+#22/ Eyecare/ecommerce / 2026-04-05/ Priority 1
+
+Target sites
+https://www.lenskart.com/ (UAE website)
+
+Category
+https://www.lenskart.com/sunglasses.html
+
+Fields to extract
+
+Product url
+Sale Price
+Listed Price
+Frame color (Get all options)
+Frame size (Get all options)
+Image urls
+Product Details (Get all the details)
+
+Data format
+CSV
+
+Additional info
+We need the complete data from the category not just a sample.
