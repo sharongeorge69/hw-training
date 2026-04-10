@@ -57,7 +57,10 @@ api_url = (
             f"&orderBy=mostRelevant&pageNumber={pageno}&enableInventoryFacetCheck=true"
         )
 response = requests.get(api_url, headers=headers, timeout=30)
-
+data = response.json()
+pdp_data = data.get('hits', [])
+pdp_path = pdp_data[0].get('seoURL')
+pdp_url = f"https://www.academy.com/p/{pdp_path}"
 
 
 
