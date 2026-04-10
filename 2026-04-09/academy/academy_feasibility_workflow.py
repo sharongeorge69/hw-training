@@ -82,3 +82,8 @@ JSON_XPATH = '//div[@data-compId="comp-blt51a442da3d780eaa"]//script[@type="appl
 
 json_text = sel.xpath(JSON_XPATH).get()
 product_data = json.loads(json_text)
+
+
+############ F I N D I N G S ###############
+
+#1. The requests need verified session cookies to avoid 403 error or captcha(Access Denied Page)
