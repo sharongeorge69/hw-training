@@ -5,7 +5,7 @@ from parsel import Selector
 import re
 from pymongo import MongoClient
 import pymongo
-from settings import MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, headers
+from settings import MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, HEADERS_API, HEADERS_HTML
 from items import ResponseURLItem
 
 # Configure Logging
@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 class Crawler:
     def __init__(self):
-        self.headers = headers
+        self.headers_api = HEADERS_API
+        self.headers_html = HEADERS_HTML
         self.base_url = 'https://mercatoronline.si/products/browseProducts/getProducts'
         
         # MongoDB connection
@@ -38,7 +39,7 @@ class Crawler:
     def get_categories(self):
         logger.info("Fetching categories from site...")
         try:
-            response = requests.get('https://mercatoronline.si/brskaj', headers=self.headers, timeout=20)
+            response = requests.get('https://mercatoronline.si/brskaj', headers=self.headers_html, timeout=20)
             if response.status_code == 200:
                 sel = Selector(text=response.text)
                 category_names = sel.xpath('//li[contains(@class, "lib-category-menu-top")]/a/@data-analytics-label').getall()
@@ -70,7 +71,7 @@ class Crawler:
             response = requests.get(
                 self.base_url,
                 params=params,
-                headers=self.headers,
+                headers=self.headers_api,
                 timeout=20
             )
             if response.status_code == 200:
