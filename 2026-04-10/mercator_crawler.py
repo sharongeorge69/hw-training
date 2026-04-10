@@ -95,14 +95,18 @@ class Crawler:
         saved_count = 0
 
         for p_wrapper in products:
-            p = p_wrapper.get('data', {})
+            # Handle both nested 'data' structure and flat structure
+            p = p_wrapper.get('data', p_wrapper)
             pdp_url_path = p.get('url')
+            
             if not pdp_url_path:
                 continue
 
             # Full URL
             final_url = f"https://mercatoronline.si{pdp_url_path}"
-            product_id = p.get('codewz')
+            
+            # Check for both codewz (new) and id (legacy)
+            product_id = p.get('codewz') or p.get('id')
             
             item = {
                 "pdp_url": final_url,
