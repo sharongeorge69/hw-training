@@ -64,7 +64,6 @@ class Crawler:
             'offset': str(offset),
             'from': str(offset * limit),
             'filterData[categories]': category_id,
-            '_': str(self.get_timestamp()),
         }
         
         try:
@@ -97,13 +96,15 @@ class Crawler:
         for p_wrapper in products:
             # Handle both nested 'data' structure and flat structure
             p = p_wrapper.get('data', p_wrapper)
-            pdp_url_path = p.get('url')
+            
+            # Try multiple keys for URL
+            pdp_url_path = p.get('url') or p.get('pdp_url') or p.get('link')
             
             if not pdp_url_path:
                 continue
 
             # Full URL
-            final_url = f"https://mercatoronline.si{pdp_url_path}"
+            final_url = f"https://mercatoronline.si{pdp_url_path}" if pdp_url_path.startswith('/') else pdp_url_path
             
             # Check for both codewz (new) and id (legacy)
             product_id = p.get('codewz') or p.get('id')
@@ -125,7 +126,13 @@ class Crawler:
             except Exception as e:
                 logger.error(f"  Save error for {final_url}: {e}")
 
-        logger.info(f"Category {category_id}: Found {found_count} products, Saved {saved_count} new products.")
+        if found_count == 0 and products:
+            logger.warning(f"Category {category_id}: Found {len(products)} potential products but extracted 0. Diagnostic: First item keys: {list(products[0].keys())}")
+            if 'data' in products[0]:
+                logger.warning(f"  Nested 'data' keys: {list(products[0]['data'].keys())}")
+        else:
+            logger.info(f"Category {category_id}: Found {found_count} products, Saved {saved_count} new products.")
+        
         return True
 
     def start(self):
