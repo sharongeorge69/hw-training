@@ -9,8 +9,8 @@ MONGO_COLLECTION_DATA = f"{PROJECT_NAME}_data"
 # MONGO_RAW_RESPONSE_DB = f"{PROJECT_NAME}_raw_response_db"
 # MONGO_COLLECTION_URL_FAILED = f"{PROJECT_NAME}_url_failed"
 
-MONGO_URI = "mongodb://127.0.0.1:27017/"
-# MONGO_URI = "mongodb://mongotraining:a4892e52373844dc4862e6c468d11b6df7938e16@209.97.183.63:27017/?authSource=admin"
+# MONGO_URI = "mongodb://127.0.0.1:27017/"
+MONGO_URI = "mongodb://mongotraining:a4892e52373844dc4862e6c468d11b6df7938e16@209.97.183.63:27017/?authSource=admin"
 
 # Headers for Ajax API requests (fetching product listings)
 HEADERS_API = {
