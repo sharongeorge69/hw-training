@@ -94,11 +94,11 @@ class Crawler:
         saved_count = 0
 
         for p_wrapper in products:
-            # Handle both nested 'data' structure and flat structure
-            p = p_wrapper.get('data', p_wrapper)
+            # Diagnostics showed URL is in outer wrapper, while metadata is in nested 'data'
+            nested_data = p_wrapper.get('data', {})
             
-            # Try multiple keys for URL
-            pdp_url_path = p.get('url') or p.get('pdp_url') or p.get('link')
+            # Try extraction from outer wrapper first, then nested data
+            pdp_url_path = p_wrapper.get('url') or nested_data.get('url')
             
             if not pdp_url_path:
                 continue
@@ -106,14 +106,16 @@ class Crawler:
             # Full URL
             final_url = f"https://mercatoronline.si{pdp_url_path}" if pdp_url_path.startswith('/') else pdp_url_path
             
-            # Check for both codewz (new) and id (legacy)
-            product_id = p.get('codewz') or p.get('id')
+            # Check for both codewz (new) and id (legacy) in both locations
+            product_id = nested_data.get('codewz') or p_wrapper.get('itemId') or nested_data.get('id')
             
-            item = {
-                "pdp_url": final_url,
-                "category_url": f"https://mercatoronline.si/brskaj#categories={category_id}",
-                "product_id": str(product_id) if product_id else None
-            }
+            # Start with the full JSON object to capture all keys
+            item = p_wrapper.copy()
+            
+            # Add/Overwrite standardized keys
+            item["pdp_url"] = final_url
+            item["category_url"] = f"https://mercatoronline.si/brskaj#categories={category_id}"
+            item["product_id"] = str(product_id) if product_id else None
 
             found_count += 1
             try:
