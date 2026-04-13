@@ -1,0 +1,9 @@
+Conducted an in-depth block-checking analysis for the Academy.com crawler, testing various proxy configurations and user-agent strings to bypass bot-detection systems.
+
+Performed rigorous testing on the Academy.com parser logic to ensure that data fields remain accessible and correctly mapped even when the site triggers defensive response headers.
+
+Initiated a deep-dive analysis of the Mercator project architecture, mapping out the site’s data hierarchy and identifying the most efficient API endpoints for extraction.
+
+Commenced the core development phase for the Mercator project, architecting the crawler’s navigation logic and implementing initial request-handling routines.
+
+
