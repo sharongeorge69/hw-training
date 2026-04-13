@@ -33,9 +33,6 @@ class Parser:
         logger.info("Connected to MongoDB")
 
     def extract_grammage(self, name, unit_quantity, invoice_unit):
-        """
-        Core extraction logic with refined priority and multipack string preservation.
-        """
         name = str(name).lower()
         
         # RULE 1: Multipack pattern (e.g., 4 x 125 g, 6 x 1 l)
@@ -201,8 +198,6 @@ class Parser:
             except:
                 pass
             
-
-        promotion_valid_upto = nested_data.get("offer_expires_on")
         
         # percentage_discount
         discounts = nested_data.get("discounts", [])
@@ -254,7 +249,6 @@ class Parser:
         item['regular_price'] = regular_price
         item['selling_price'] = selling_price
         item['price_was'] = price_was
-        item['promotion_valid_upto'] = promotion_valid_upto
         item['percentage_discount'] = percentage_discount
         item['price_per_unit'] = price_per_unit
         item['currency'] = currency
