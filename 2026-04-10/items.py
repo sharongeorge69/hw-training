@@ -1,4 +1,4 @@
-from mongoengine import DynamicDocument, StringField
+from mongoengine import DynamicDocument, StringField, DictField
 import settings
 
 class ResponseURLItem(DynamicDocument):
@@ -43,7 +43,7 @@ class ProductDataItem(DynamicDocument):
     instructionforuse = StringField()
     product_specific_data = StringField()
     distributor_address = StringField()
-    nutritional_values = StringField() # or DictField if preferred
+    nutritional_values = DictField()
     image_url_1 = StringField()
     image_url_2 = StringField()
     image_url_3 = StringField()
