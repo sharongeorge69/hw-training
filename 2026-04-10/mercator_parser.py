@@ -1,3 +1,4 @@
+import re
 import time
 import random
 import requests
@@ -31,6 +32,35 @@ class Parser:
         self.product_collection.create_index("unique_id", unique=True)
         logger.info("Connected to MongoDB")
 
+    def extract_grammage(self, name, unit_quantity, invoice_unit):
+        """
+        Core extraction logic with refined priority and multipack string preservation.
+        """
+        name = str(name).lower()
+        
+        # RULE 1: Multipack pattern (e.g., 4 x 125 g, 6 x 1 l)
+        multi_match = re.search(r'(\d+)\s?[x*]\s?(\d+(?:[.,]\d+)?)\s?(kg|g|ml|l)\b', name)
+        if multi_match:
+            count = multi_match.group(1)
+            val = multi_match.group(2).replace(',', '.')
+            unit = multi_match.group(3)
+            return f"{count} x {val}", unit.lower()
+        
+        # RULE 2: Simple Grammage (e.g., 400 g, 1 l)
+        grammage_match = re.search(r'(\d+(?:[.,]\d+)?)\s?(kg|g|ml|l)\b', name)
+        if grammage_match:
+            qty = grammage_match.group(1).replace(',', '.')
+            unit = grammage_match.group(2)
+            return qty, unit.lower()
+
+        # RULE 3/4: Ignore dimensions or pack patterns -> return 1 kos
+        if re.search(r'\d+\s?(mm|cm|m)\s?x\s?\d+', name) or re.search(r'\d+/\d+', name):
+            return 1, "kos"
+        
+        # Fallback to API data, ensuring lowercase unit
+        final_unit = str(invoice_unit).lower()
+        return unit_quantity, final_unit
+
     def parse_nutritional_table(self, table_sel):
         """
         Parses the nutritional table into a dictionary.
@@ -42,15 +72,11 @@ class Parser:
             if not cells:
                 continue
             
-            # XPATH
-            KEY_XPATH = "string(.)"
-            VALUE_XPATH = "string(.)"
-
             # EXTRACT
-            key = cells[0].xpath(KEY_XPATH).extract_first("").strip()
+            key = cells[0].xpath("string(.)").extract_first("").strip()
             value_parts = []
             for cell in cells[1:]:
-                val = cell.xpath(VALUE_XPATH).extract_first("").strip()
+                val = cell.xpath("string(.)").extract_first("").strip()
                 if val:
                     value_parts.append(val)
             if key:
@@ -143,8 +169,11 @@ class Parser:
 
         product_name = nested_data.get("name") or doc.get("name") or doc.get("short_name")
         brand = nested_data.get("brand_name")
-        grammage_quantity = nested_data.get("unit_quantity")
-        grammage_unit = nested_data.get("invoice_unit")
+        
+        # Refined grammage extraction
+        raw_qty = nested_data.get("unit_quantity")
+        raw_unit = nested_data.get("invoice_unit")
+        grammage_quantity, grammage_unit = self.extract_grammage(product_name, raw_qty, raw_unit)
         
         hierarchy_level1 = " VSI IZDELKI "
         hierarchy_level2 = nested_data.get("category1", "")
