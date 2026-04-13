@@ -199,7 +199,7 @@ class Parser:
         
         # allergens
         allergens_list = nested_data.get("allergens", [])
-        vsebuje_allergens = [a.get("hover_text") for a in allergens_list if a.get("hover_text", "").startswith("Vsebuje")]
+        vsebuje_allergens = [a.get("hover_text") for a in allergens_list if a.get("hover_text") and isinstance(a.get("hover_text"), str) and a.get("hover_text").startswith("Vsebuje")]
         allergens = ", ".join(vsebuje_allergens)
         
         rating = nested_data.get("rating")
