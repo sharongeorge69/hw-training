@@ -231,8 +231,10 @@ class Parser:
         vsebuje_allergens = [a.get("hover_text") for a in allergens_list if a.get("hover_text") and isinstance(a.get("hover_text"), str) and a.get("hover_text").startswith("Vsebuje")]
         allergens = ", ".join(vsebuje_allergens)
         
-        rating = nested_data.get("rating")
-        review = nested_data.get("ratings_num")
+        grammage_quantity = str(grammage_quantity) if grammage_quantity is not None else ""
+        rating = str(nested_data.get("rating") or "")
+        review = str(nested_data.get("ratings_num") or "")
+        
         image_url_1 = doc.get("mainImageSrc")
         site_shown_uom = product_name
         product_unique_key = f"{unique_id}P"
