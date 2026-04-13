@@ -2,7 +2,6 @@ import logging
 import time
 import requests
 from parsel import Selector
-import re
 from pymongo import MongoClient
 import pymongo
 from settings import MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, HEADERS_API, HEADERS_HTML
@@ -30,20 +29,25 @@ class Crawler:
         self.url_collection.create_index("pdp_url", unique=True)
         logger.info("Connected to MongoDB")
 
-        # Categories will be populated dynamically
         self.categories = {}
 
-    def get_timestamp(self):
-        return int(time.time() * 1000)
-
     def get_categories(self):
+        """
+        Fetches categories and their IDs from the website.
+        """
         logger.info("Fetching categories from site...")
         try:
             response = requests.get('https://mercatoronline.si/brskaj', headers=self.headers_html, timeout=20)
             if response.status_code == 200:
-                sel = Selector(text=response.text)
-                category_names = sel.xpath('//li[contains(@class, "lib-category-menu-top")]/a/@data-analytics-label').getall()
-                category_ids = sel.xpath('//li[contains(@class, "lib-category-menu-top")]/@data-category-id').getall()
+                selector = Selector(text=response.text)
+                
+                # XPATH
+                CATEGORY_NAMES_XPATH = '//li[contains(@class, "lib-category-menu-top")]/a/@data-analytics-label'
+                CATEGORY_IDS_XPATH = '//li[contains(@class, "lib-category-menu-top")]/@data-category-id'
+                
+                # EXTRACT
+                category_names = selector.xpath(CATEGORY_NAMES_XPATH).extract()
+                category_ids = selector.xpath(CATEGORY_IDS_XPATH).extract()
                 
                 if category_names and category_ids and len(category_names) == len(category_ids):
                     self.categories = dict(zip(category_names, category_ids))
@@ -57,31 +61,6 @@ class Crawler:
             logger.error(f"Exception during category fetching: {e}")
         return False
 
-    def fetch_products(self, category_id, offset=0):
-        limit = 100
-        params = {
-            'limit': str(limit),
-            'offset': str(offset),
-            'from': str(offset * limit),
-            'filterData[categories]': category_id,
-        }
-        
-        try:
-            response = requests.get(
-                self.base_url,
-                params=params,
-                headers=self.headers_api,
-                timeout=20
-            )
-            if response.status_code == 200:
-                return response.json()
-            else:
-                logger.error(f"Error {response.status_code} for category {category_id} at offset {offset}")
-                return None
-        except Exception as e:
-            logger.error(f"Exception fetching products for category {category_id}: {e}")
-            return None
-
     def parse_item(self, response_json, category_id):
         if not response_json or 'products' not in response_json:
             return False
@@ -92,32 +71,28 @@ class Crawler:
 
         found_count = 0
         saved_count = 0
+        category_url = f"https://mercatoronline.si/brskaj#categories={category_id}"
 
-        for p_wrapper in products:
-            # Diagnostics showed URL is in outer wrapper, while metadata is in nested 'data'
-            nested_data = p_wrapper.get('data', {})
+        for product_wrapper in products:
+            found_count += 1
+            nested_data = product_wrapper.get('data', {})
             
-            # Try extraction from outer wrapper first, then nested data
-            pdp_url_path = p_wrapper.get('url') or nested_data.get('url')
-            
+            # Determine URL
+            pdp_url_path = product_wrapper.get('url') or nested_data.get('url')
             if not pdp_url_path:
                 continue
 
-            # Full URL
+            # VARIABLES
             final_url = f"https://mercatoronline.si{pdp_url_path}" if pdp_url_path.startswith('/') else pdp_url_path
-            
-            # Check for both codewz (new) and id (legacy) in both locations
-            product_id = nested_data.get('codewz') or p_wrapper.get('itemId') or nested_data.get('id')
-            
-            # Start with the full JSON object to capture all keys
-            item = p_wrapper.copy()
-            
-            # Add/Overwrite standardized keys
-            item["pdp_url"] = final_url
-            item["category_url"] = f"https://mercatoronline.si/brskaj#categories={category_id}"
-            item["product_id"] = str(product_id) if product_id else None
+            raw_id = nested_data.get('codewz') or product_wrapper.get('itemId') or nested_data.get('id')
+            product_id = str(raw_id) if raw_id else None
 
-            found_count += 1
+            # ITEM
+            item = product_wrapper.copy()
+            item["pdp_url"] = final_url
+            item["category_url"] = category_url
+            item["product_id"] = product_id
+
             try:
                 response_item = ResponseURLItem(**item)
                 response_item.validate()
@@ -128,13 +103,7 @@ class Crawler:
             except Exception as e:
                 logger.error(f"  Save error for {final_url}: {e}")
 
-        if found_count == 0 and products:
-            logger.warning(f"Category {category_id}: Found {len(products)} potential products but extracted 0. Diagnostic: First item keys: {list(products[0].keys())}")
-            if 'data' in products[0]:
-                logger.warning(f"  Nested 'data' keys: {list(products[0]['data'].keys())}")
-        else:
-            logger.info(f"Category {category_id}: Found {found_count} products, Saved {saved_count} new products.")
-        
+        logger.info(f"Category {category_id}: Found {found_count} products, Saved {saved_count} new products.")
         return True
 
     def start(self):
@@ -145,37 +114,56 @@ class Crawler:
         max_retries = 3
         logger.info(f"Starting crawler for {len(self.categories)} categories...")
 
-        for cat_name, cat_id in self.categories.items():
-            logger.info(f"Crawling category: {cat_name} ({cat_id})")
+        for category_name, category_id in self.categories.items():
+            logger.info(f"Crawling category: {category_name} ({category_id})")
             offset = 0
             
             while True:
                 success = False
+                json_data = None
+                
+                # Inline fetching logic
+                params = {
+                    'limit': '100',
+                    'offset': str(offset),
+                    'from': str(offset * 100),
+                    'filterData[categories]': category_id,
+                }
+                
                 for attempt in range(max_retries):
-                    data = self.fetch_products(cat_id, offset)
-                    if data:
-                        if self.parse_item(data, cat_id):
-                            success = True
-                            break
+                    try:
+                        response = requests.get(
+                            self.base_url,
+                            params=params,
+                            headers=self.headers_api,
+                            timeout=20
+                        )
+                        if response.status_code == 200:
+                            json_data = response.json()
+                            if self.parse_item(json_data, category_id):
+                                success = True
+                                break
+                            else:
+                                logger.info(f"No more products for {category_name} at offset {offset}")
+                                success = True 
+                                json_data = None 
+                                break
                         else:
-                            logger.info(f"No more products for {cat_name} at offset {offset}")
-                            success = True 
-                            data = None 
-                            break
-                    else:
-                        logger.warning(f"  Attempt {attempt + 1} failed for {cat_name} offset {offset}")
-                        if attempt < max_retries - 1:
-                            time.sleep(2 ** attempt)
+                            logger.warning(f"  Attempt {attempt + 1} failed for {category_name} offset {offset} with code {response.status_code}")
+                    except Exception as e:
+                        logger.warning(f"  Attempt {attempt + 1} failed for {category_name} offset {offset} with error: {e}")
+                    
+                    if attempt < max_retries - 1:
+                        time.sleep(2 ** attempt)
 
                 if not success:
-                    logger.error(f"Failed to crawl {cat_name} offset {offset} after {max_retries} attempts")
+                    logger.error(f"Failed to crawl {category_name} offset {offset} after {max_retries} attempts")
                     break
                 
-                if data is None: # parse_item found no products
+                if json_data is None: 
                     break
                 
                 offset += 1
-                time.sleep(1) # Polite delay
 
     def close(self):
         try:
