@@ -1,0 +1,9 @@
+Conducted a technical deep-dive into the Mercator platform’s architecture.
+
+Architected and implemented the core crawler for Mercator, focusing on request scheduling, efficient URL discovery, and robust error-handling for intermittent network failures.
+
+Developed a high-precision parser to transform raw HTML/JSON responses into structured data, ensuring accurate capture of complex attributes.
+
+erformed comprehensive code testing and initiated the first production-level run, monitoring the crawler's performance to ensure data integrity and optimal extraction speed.
+
+
