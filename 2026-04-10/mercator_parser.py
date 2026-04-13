@@ -31,6 +31,32 @@ class Parser:
         self.product_collection.create_index("unique_id", unique=True)
         logger.info("Connected to MongoDB")
 
+    def parse_nutritional_table(self, table_sel):
+        """
+        Parses the nutritional table into a dictionary.
+        """
+        nutri_dict = {}
+        rows = table_sel.xpath(".//tbody/tr")
+        for row in rows:
+            cells = row.xpath("./td")
+            if not cells:
+                continue
+            
+            # XPATH
+            KEY_XPATH = "string(.)"
+            VALUE_XPATH = "string(.)"
+
+            # EXTRACT
+            key = cells[0].xpath(KEY_XPATH).extract_first("").strip()
+            value_parts = []
+            for cell in cells[1:]:
+                val = cell.xpath(VALUE_XPATH).extract_first("").strip()
+                if val:
+                    value_parts.append(val)
+            if key:
+                nutri_dict[key] = " ".join(value_parts)
+        return nutri_dict
+
     def get_pdp_data(self, url):
         """
         Fetches the PDP HTML with retries and extracts data fields.
@@ -124,10 +150,6 @@ class Parser:
         hierarchy_level2 = nested_data.get("category1", "")
         hierarchy_level3 = nested_data.get("category2", "")
         hierarchy_level4 = nested_data.get("category3", "")
-        
-        # Price Logic
-        raw_normal_price = nested_data.get("normal_price")
-        raw_current_price = nested_data.get("current_price")
         
         # Price Logic
         raw_normal_price = nested_data.get("normal_price")
