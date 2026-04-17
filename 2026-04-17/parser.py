@@ -13,9 +13,10 @@ except:
     pass
 
 def extract_data(url):
-    # Minimal configuration to avoid "No headers" ValueError on some servers.
-    # On servers, adding constraints like OS or screen versions often causes conflicts.
-    with Camoufox(headless=True) as browser:
+    # 'virtual' uses Xvfb to simulate a display, which is the most reliable way 
+    # to avoid fingerprint generation errors on headless Linux servers.
+    # Note: Requires 'apt-get install xvfb' on the server.
+    with Camoufox(headless="virtual") as browser:
         page = browser.new_page()
         # Navigate to a URL
         print(f"Navigating to {url}...")
