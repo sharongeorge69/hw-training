@@ -2,11 +2,20 @@ import time
 import json
 import re
 from datetime import datetime
+import camoufox
 from camoufox.sync_api import Camoufox
 from parsel import Selector
 
+# Ensure fingerprint database is downloaded (essential for servers)
+try:
+    camoufox.fetch()
+except:
+    pass
+
 def extract_data(url):
-    with Camoufox(headless=True, os=["windows", "macos"]) as browser:
+    # Minimal configuration to avoid "No headers" ValueError on some servers.
+    # On servers, adding constraints like OS or screen versions often causes conflicts.
+    with Camoufox(headless=True) as browser:
         page = browser.new_page()
         # Navigate to a URL
         print(f"Navigating to {url}...")
