@@ -6,7 +6,7 @@ from camoufox.sync_api import Camoufox
 from parsel import Selector
 
 def extract_data(url):
-    with Camoufox(headless=True) as browser:
+    with Camoufox(headless=True, os=["windows", "macos"]) as browser:
         page = browser.new_page()
         # Navigate to a URL
         print(f"Navigating to {url}...")
