@@ -1,0 +1,9 @@
+Conducted a technical deep-dive into the RestockIt site architecture, mapping out the category navigation and identifying the specific XHR/JSON endpoints used for dynamic product loading.
+
+Formally launched the development phase for the RestockIt scraper, establishing the project structure and configuring the initial request headers to match authentic browser signatures.
+
+Engineered the core crawler logic for RestockIt.
+
+Developed a specialized parser to extract structured data from raw HTML
+
+
