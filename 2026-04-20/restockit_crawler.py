@@ -29,22 +29,27 @@ class Crawler:
         self.url_collection.create_index("pdp_url", unique=True)
         logger.info("Connected to MongoDB")
 
-    def get_product_sitemaps(self, page):
+    def get_product_sitemaps(self, page, max_retries=3):
         logger.info(f"Fetching main sitemap: {self.main_sitemap}")
-        try:
-            response = page.goto(self.main_sitemap, wait_until="load", timeout=60000)
-            if not response or response.status != 200:
-                logger.error(f"Failed to fetch main sitemap. Status: {response.status if response else 'No Response'}")
-                return []
+        for attempt in range(max_retries):
+            try:
+                response = page.goto(self.main_sitemap, wait_until="load", timeout=60000)
+                if response and response.status == 200:
+                    content = response.body().decode('utf-8')
+                    selector = Selector(text=content, type='xml')
+                    
+                    product_sitemaps = selector.xpath('//*[local-name()="loc"][contains(text(), "sitemap_products")]/text()').getall()
+                    return product_sitemaps
+                else:
+                    logger.warning(f"  Attempt {attempt + 1} failed for main sitemap. Status: {response.status if response else 'No Response'}")
+            except Exception as e:
+                logger.warning(f"  Attempt {attempt + 1} failed for main sitemap with error: {e}")
             
-            content = response.body().decode('utf-8')
-            selector = Selector(text=content, type='xml')
-            
-            product_sitemaps = selector.xpath('//*[local-name()="loc"][contains(text(), "sitemap_products")]/text()').getall()
-            return product_sitemaps
-        except Exception as e:
-            logger.error(f"Error fetching main sitemap: {e}")
-            return []
+            if attempt < max_retries - 1:
+                time.sleep(2 ** attempt)
+        
+        logger.error(f"Failed to fetch main sitemap after {max_retries} attempts.")
+        return []
 
     def parse_item(self, page, sitemap_url):
         logger.info(f"Crawling sitemap: {sitemap_url}")
@@ -100,11 +105,12 @@ class Crawler:
             return False
 
     def start(self):
+        max_retries = 3
         logger.info("Starting crawler...")
         with Camoufox(headless=True) as browser:
             page = browser.new_page()
             
-            product_sitemaps = self.get_product_sitemaps(page)
+            product_sitemaps = self.get_product_sitemaps(page, max_retries=max_retries)
             if not product_sitemaps:
                 logger.error("No product sitemaps found. Exiting.")
                 return
@@ -112,9 +118,19 @@ class Crawler:
             logger.info(f"Total product sitemaps found: {len(product_sitemaps)}")
 
             for sitemap_url in product_sitemaps:
-                success = self.parse_item(page, sitemap_url)
+                success = False
+                for attempt in range(max_retries):
+                    if self.parse_item(page, sitemap_url):
+                        success = True
+                        break
+                    else:
+                        logger.warning(f"  Attempt {attempt + 1} failed for sitemap: {sitemap_url}")
+                    
+                    if attempt < max_retries - 1:
+                        time.sleep(2 ** attempt)
+                
                 if not success:
-                    logger.error(f"Failed to process sitemap: {sitemap_url}")
+                    logger.error(f"Failed to process sitemap after {max_retries} attempts: {sitemap_url}")
                 
                 time.sleep(1)
 
