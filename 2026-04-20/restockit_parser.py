@@ -114,9 +114,6 @@ class Parser:
                     logger.warning(f"Item {idx}/{total} is missing URL. Skipping.")
                     continue
 
-                # Use product_id or part of URL as unique_id
-                unique_id = product_id if product_id else re.search(r'products/([^/?#]+)', pdp_url).group(1)
-
                 # De-duplicate using URL
                 if self.product_collection.find_one({"url": pdp_url}):
                     logger.info(f"Processing Item {idx}/{total}: {pdp_url} (Already parsed, skipping)")
@@ -135,9 +132,9 @@ class Parser:
                     )
                     continue
 
-                self.parse_item(pdp_url, html_content, unique_id)
+                self.parse_item(pdp_url, html_content)
 
-    def parse_item(self, pdp_url, html_content, unique_id):
+    def parse_item(self, pdp_url, html_content):
         selector = Selector(text=html_content)
         
         # Standard XPaths
