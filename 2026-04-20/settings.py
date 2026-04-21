@@ -21,5 +21,5 @@ from datetime import datetime
 import os
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 EXTRACTION_DATE = datetime.now().strftime("%Y-%m-%d")
-FILE_NAME_FULLDUMP = os.path.join(BASE_DIR, f"{PROJECT_NAME}_{datetime.now().strftime('%Y_%m_%d')}_{'sample'}.csv")
+FILE_NAME_FULLDUMP = os.path.join(BASE_DIR, f"{PROJECT_NAME}_{datetime.now().strftime('%Y_%m_%d')}_{'sample'}.txt")
 EXPORT_LIMIT = 200
