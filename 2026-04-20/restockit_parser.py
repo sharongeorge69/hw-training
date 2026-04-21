@@ -37,8 +37,7 @@ class Parser:
         self.product_collection.create_index("url", unique=True)
         logger.info("Connected to MongoDB")
 
-    @staticmethod
-    def extract_uoi_qty(text):
+    def extract_uoi_qty(self, text):
         if not text:
             return "", ""
 
@@ -108,7 +107,6 @@ class Parser:
             
             for idx, doc in enumerate(self.url_collection.find(), 1):
                 pdp_url = doc.get("pdp_url")
-                product_id = doc.get("product_id")
                 
                 if not pdp_url:
                     logger.warning(f"Item {idx}/{total} is missing URL. Skipping.")
@@ -142,7 +140,9 @@ class Parser:
         UPC_XPATH = '//div[contains(@class, "mt-3") and contains(strong, "UPC")]/text()[normalize-space()]'
         INVENTORY_SCRIPT_XPATH = '//script[@data-product-inventory-json]/text()'
         JSON_LD_XPATH = '//script[@type="application/ld+json"]/text()'
-
+        COUNTRY_OF_ORIGIN_XPATH = '//*[local-name()="tr"][.//td[normalize-space(.)="Country of Origin"]]/td[last()]/text()'
+        CASE_PACK_XPATH = '//*[local-name()="tr"][.//td[normalize-space(.)="Case Pack"]]/td[last()]/text()'
+        CASE_PACK_XPATH_2 = 'normalize-space(substring-after(//span[@data-price], "/"))'
         # 1. JSON-LD Extraction
         json_ld_data = {}
         json_ld_scripts = selector.xpath(JSON_LD_XPATH).getall()
@@ -208,15 +208,15 @@ class Parser:
             except:
                 pass
 
-        raw_uoi = selector.xpath('//*[local-name()="tr"][.//td[normalize-space(.)="Case Pack"]]/td[last()]/text()').get()
+        raw_uoi = selector.xpath(CASE_PACK_XPATH).get()
         if raw_uoi == None:
-            raw_uoi = selector.xpath('normalize-space(substring-after(//span[@data-price], "/"))').get()
+            raw_uoi = selector.xpath(CASE_PACK_XPATH_2).get()
         
         parsed_uoi, parsed_qty = self.extract_uoi_qty(raw_uoi)
         
-        country_of_origin = selector.xpath('//*[local-name()="tr"][.//td[normalize-space(.)="Country of Origin"]]/td[last()]/text()').get()
+        country_of_origin = selector.xpath(COUNTRY_OF_ORIGIN_XPATH).get()
         country_of_origin = country_of_origin.strip() if country_of_origin else ""
-        # 3. Final Dataset Assignment
+
         item = {}
         item['company_name'] = 'Restockit'
         item['manufacturer_name'] = manufacturer_name
