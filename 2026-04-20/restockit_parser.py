@@ -77,7 +77,6 @@ class Parser:
                 response = page.goto(url, wait_until="load", timeout=60000)
                 
                 if response and response.status == 200:
-                    # Give dynamic content time to load
                     time.sleep(2)
                     return page.content()
                 elif response and response.status == 404:
