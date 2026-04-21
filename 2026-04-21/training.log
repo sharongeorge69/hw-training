@@ -1,0 +1,11 @@
+Finalized the development of the RestockIt parser, implementing logic to extract structured product attributes, including nested specification tables and tiered pricing data.
+
+Participated in a doubt clearance session
+
+Conducted rigorous data cleaning on the RestockIt dataset, utilizing Python scripts to normalize units and performing end-to-end testing to ensure output consistency.
+
+Authored a specialized script for sample data extraction, incorporating randomized category sampling to verify the crawler's performance across diverse product types.
+
+Executed the sample extraction run and performed a comprehensive QA audit, verifying that all captured fields align with the project’s data integrity standards.
+
+
