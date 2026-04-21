@@ -23,18 +23,25 @@ from camoufox.sync_api import Camoufox
 from parsel import Selector
 
 test_url = "https://www.restockit.com/products/3m-peltor-x-series-earmuffs-num-mmmx5a"
+
+BREADCRUMBS_XPATH = '//a[contains(@class, "breadcrumbs__link")]/text()'
+UPC_XPATH = '//div[contains(@class, "mt-3") and contains(strong, "UPC")]/text()[normalize-space()]'
+INVENTORY_SCRIPT_XPATH = '//script[@data-product-inventory-json]/text()'
+JSON_LD_XPATH = '//script[@type="application/ld+json"]/text()'
 with Camoufox(headless=True) as browser:
     page = browser.new_page()
     response = page.goto(test_url, wait_until="load")
     html = page.content()
     selector = Selector(text=html)
-    json_ld_scripts = selector.xpath('//script[@type="application/ld+json"]/text()').getall()
-    item_name = selector.css('h1.product__title::text').get() 
-
-    brand_name = selector.css('.product-vendor a::text').get() 
-    upc = selector.xpath('//div[contains(@class, "mt-3") and contains(strong, "UPC")]/text()[normalize-space()]').get()
-    inventory_script = selector.css('script[data-product-inventory-json]::text').get()
-    categories = selector.css('.breadcrumbs__link::text').getall()
-    description = selector.css('.accordion__content::text').get() 
-    price_text = selector.css('.price__current::text').get()
-    sku_text = selector.css('.product__sku::text').get()
+    json_ld_data = selector.xpath(JSON_LD_XPATH).getall()
+    item_name = json_ld_data.get('name', '')
+    brand_name = json_ld_data.get('brand', {}).get('name', '')
+    vendor_seller_part_number = json_ld_data.get('sku', '')
+    offers = json_ld_data.get('offers', {})
+    price_val = offers[0].get('price', '')
+    description = json_ld_data.get('description', '')
+    categories = selector.xpath(BREADCRUMBS_XPATH).getall()
+    upc = selector.xpath(UPC_XPATH).get()
+    inventory_script = selector.xpath(INVENTORY_SCRIPT_XPATH).get()
+    raw_uoi = selector.xpath('//*[local-name()="tr"][.//td[normalize-space(.)="Case Pack"]]/td[last()]/text()').get()
+    country_of_origin = selector.xpath('//*[local-name()="tr"][.//td[normalize-space(.)="Country of Origin"]]/td[last()]/text()').get()
