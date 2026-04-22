@@ -40,13 +40,13 @@ class Parser:
     def clean_description(self, text):
         if not text:
             return ""
-        # Handle HD Supply specific caret separators first
-        text = text.replace(' ^ ', '\n').replace('^', '\n')
+        # Handle HD Supply specific caret separators
+        text = text.replace(' ^ ', ' ').replace('^', ' ')
         # Remove HTML tags if any
         text = re.sub(r'<[^>]+>', ' ', text)
-        # Normalize lines and whitespace
-        lines = [line.strip() for line in text.split('\n') if line.strip()]
-        return '\n'.join(lines)
+        # Normalize whitespace and join with space
+        segments = [s.strip() for s in text.split(' ') if s.strip()]
+        return ' '.join(segments)
 
     def fetch_page(self, url, max_retries=3):
         for attempt in range(max_retries):
@@ -203,7 +203,7 @@ class Parser:
                 continue
             self.parse_item(pdp_url, html_content)
 
-            time.sleep(random.uniform(0.5, 1.5))
+            # time.sleep(random.uniform(0.5, 1.5))
 
     def close(self):
         try:
