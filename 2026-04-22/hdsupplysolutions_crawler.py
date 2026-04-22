@@ -38,7 +38,6 @@ class Crawler:
                     content = response.text
                     selector = Selector(text=content, type='xml')
                     
-                    # HD Supply sitemap-index contains various category sitemaps
                     sitemap_urls = selector.xpath('//*[local-name()="loc"]/text()').getall()
                     return sitemap_urls
                 else:
@@ -65,12 +64,11 @@ class Crawler:
             
             urls = selector.xpath('//*[local-name()="loc"]/text()').getall()
             
-            # HD Supply uses /p/ for products
             product_urls = [url for url in urls if "/p/" in url]
 
             if not product_urls:
                 logger.warning(f"No products found on {sitemap_url}")
-                return True # Not a failure, just empty
+                return True 
 
             found_count = 0
             saved_count = 0
