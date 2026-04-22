@@ -92,7 +92,6 @@ class Parser:
             entry = json_data['catalogEntryView'][0]
             attributes = entry.get('attributes', [])
 
-            # Helper to get attribute value by identifier
             def get_attr(identifier):
                 for attr in attributes:
                     if attr.get('identifier') == identifier:
@@ -127,7 +126,7 @@ class Parser:
             unit_of_issue = get_attr("UOM")
             qty_per_uoi = get_attr("pkgquantity")
             upc = get_attr("UPC") or get_attr("Supplier UPC") or get_attr("UPC Code")
-            model_number = "" # User explicitly requested empty for now
+            model_number = ""
             availability = get_attr("MaterialStatus") or "Check Site"
             rohs_reach = rohs_reach
 
@@ -177,7 +176,6 @@ class Parser:
         total = self.url_collection.count_documents({})
         logger.info(f"Total items to parse: {total}")
 
-        # Limit for initial run if needed, but here we process all
         for idx, doc in enumerate(self.url_collection.find(), 1):
             pdp_url = doc.get("pdp_url")
             
