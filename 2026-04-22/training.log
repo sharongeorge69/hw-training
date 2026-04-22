@@ -1,0 +1,9 @@
+Conducted a deep-dive technical analysis of the HD Supply Solutions platform
+
+Engineered the core crawler for HD Supply, implementing custom header signatures and a robust request-scheduling algorithm to navigate their extensive product catalog efficiently.
+
+Finalized the integrated crawler codebase and executed a series of stress tests, verifying that the request logic successfully.
+
+Initiated the development of a high-precision parser for HD Supply.
+
+
