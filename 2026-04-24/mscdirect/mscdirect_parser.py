@@ -137,13 +137,13 @@ class Parser:
             stock_on_hand = ""
 
             # Extract specs table into full_product_description_2 dictionary
-            spec_dict = {}
+            specification_dictionary = {}
             specs = sel.xpath('//div[@id="specs-table-wrapper"]//td[@id and @data-value]')
             for td in specs:
                 k = td.xpath('./@id').extract_first("").strip()
                 v = td.xpath('./@data-value').extract_first("").strip()
                 if k and v:
-                    spec_dict[k] = v
+                    specification_dictionary[k] = v
 
             item = {}
             item["company_name"] = "MSCDirect"
@@ -166,7 +166,7 @@ class Parser:
             item["lead_time"] = lead_time
             item["rohs_reach"] = rohs_reach
             item["stock_on_hand"] = stock_on_hand
-            item["full_product_description_2"] = spec_dict
+            item["full_product_description_2"] = specification_dictionary
 
 
             # Save to MongoDB
