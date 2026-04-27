@@ -1,6 +1,5 @@
 import logging
 import time
-import re
 import gzip
 import io
 import requests
@@ -10,7 +9,6 @@ import pymongo
 from parsel import Selector
 
 from settings import MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE, SITEMAP_URL, headers
-from items import ResponseURLItem
 
 # Configure Logging
 logging.basicConfig(
@@ -76,7 +74,6 @@ class Crawler:
             selector = Selector(text=content, type='xml')
             urls = selector.xpath('//*[local-name()="loc"]/text()').getall()
             
-            # Filter for products - strictly URLs that start with /parts/ after the domain
             product_urls = [u for u in urls if "https://www.partssource.com/parts/" in u]
 
             if not product_urls:
@@ -89,8 +86,7 @@ class Crawler:
                 item = {
                     "pdp_url": pdp_url,
                     "category_url": sitemap_url,
-                }                
-
+                }
                 found_count += 1
                 try:
                     self.url_collection.insert_one(item)
@@ -98,7 +94,6 @@ class Crawler:
                 except pymongo.errors.DuplicateKeyError:
                     pass
                 except Exception as e:
-                    # Ignore occasional errors during high concurrency unless critical
                     pass
             
             return found_count, saved_count
