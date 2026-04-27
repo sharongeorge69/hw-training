@@ -89,12 +89,7 @@ class Crawler:
                 item = {
                     "pdp_url": pdp_url,
                     "category_url": sitemap_url,
-                }
-                
-                # Extract product id if possible (e.g. /parts/12345/Name)
-                match = re.search(r"/parts/([^/]+)", pdp_url)
-                if match:
-                    item["product_id"] = match.group(1)
+                }                
 
                 found_count += 1
                 try:
