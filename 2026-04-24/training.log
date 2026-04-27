@@ -1,0 +1,11 @@
+Conducted a technical deep-dive into the MSCDirect site architecture.
+
+Engineered a high-precision parser for MSCDirect.
+
+Finalized the MSCDirect parser codebase and performed extensive testing against various product categories to ensure 100% data extraction accuracy.
+
+Performed a structural audit of the Quill platform to identify data-rich script tags.
+
+Developed a robust parser for the Quill project.
+
+Concluded the development phase for the Quill parser, executing end-to-end tests to verify that extracted data aligns with the target schema.
