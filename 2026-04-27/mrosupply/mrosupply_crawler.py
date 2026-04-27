@@ -1,6 +1,5 @@
 import logging
 import time
-import re
 import requests
 from pymongo import MongoClient
 import pymongo
@@ -37,23 +36,14 @@ class Crawler:
                 if response.status_code == 200:
                     selector = Selector(text=response.text, type='xml')
                     
-                    # Try to find sub-sitemaps (sitemapindex)
                     sitemaps = selector.xpath('//*[local-name()="loc"]/text()').getall()
                     
                     # Filter for product sitemaps
                     product_sitemaps = [s for s in sitemaps if "sitemap-product" in s]
                     
                     if not product_sitemaps and sitemaps:
-                        # If no "sitemap-product" found but locs exist, maybe the main sitemap IS a product sitemap or we should just check all locs
-                        # But standard is to have product sitemaps.
-                        # For MROSupply, the sample showed sitemap-product-1.xml
-                        logger.warning("No sitemaps with 'sitemap-product' found. Checking all locs.")
-                        product_sitemaps = sitemaps
-
-                    if not product_sitemaps:
-                        # Fallback to known pattern if still empty
-                        logger.warning("Main sitemap did not return sub-sitemaps. Trying known pattern.")
-                        return ["https://www.mrosupply.com/sitemap-product-1.xml"]
+                        logger.warning("No sitemaps with 'sitemap-product' found.")
+                        return None
 
                     return product_sitemaps
                 else:
@@ -81,18 +71,6 @@ class Crawler:
             urls = selector.xpath('//*[local-name()="loc"]/text()').getall()
             # Filter only product URLs
             product_urls = [url for url in urls if "/product/" in url]
-
-            if not product_urls:
-                logger.warning(f"No products found on {sitemap_url}")
-                # Check if it contains sub-sitemaps (just in case)
-                sub_sitemaps = [u for u in urls if ".xml" in u and u != sitemap_url]
-                if sub_sitemaps:
-                    logger.info(f"Detected sub-sitemaps in what was expected to be a leaf sitemap: {len(sub_sitemaps)}")
-                    for sub in sub_sitemaps:
-                        self.parse_item(sub)
-                    return True
-                return True 
-
             found_count = 0
             saved_count = 0
             
@@ -101,17 +79,10 @@ class Crawler:
                     "pdp_url": pdp_url,
                     "category_url": sitemap_url,
                 }
-                
-                # Extract product id if possible from URL (e.g. /product/12345-name)
-                match = re.search(r"/product/(\d+)", pdp_url)
-                if match:
-                    item["product_id"] = match.group(1)
-
                 found_count += 1
                 try:
-                    # Validate using the Item class (if needed for strictness)
-                    # response_item = ResponseURLItem(**item)
-                    # response_item.validate()
+                    response_item = ResponseURLItem(**item)
+                    response_item.validate()
                     
                     self.url_collection.insert_one(item)
                     saved_count += 1
