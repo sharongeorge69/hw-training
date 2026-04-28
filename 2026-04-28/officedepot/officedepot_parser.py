@@ -121,14 +121,14 @@ class Parser:
         data = data_wrapper.get('sku_state', {})
         datalayer = data_wrapper.get('datalayer', {})
         
-        query = data.get('query', {})
-        fetch_data = data.get('fetchData', {})
-        sku_info = fetch_data.get('skuInfo', {})
-        catalog = sku_info.get('catalog', {})
-        sku_details = sku_info.get('skuDetails', {})
-        product_details = catalog.get('productDetails', [])
-        breadcrumbs = catalog.get('breadcrumbs', [])
-        price_info = sku_details.get('price', {})
+        query = data.get('query') or {}
+        fetch_data = data.get('fetchData') or {}
+        sku_info = fetch_data.get('skuInfo') or {}
+        catalog = sku_info.get('catalog') or {}
+        sku_details = sku_info.get('skuDetails') or {}
+        product_details = catalog.get('productDetails') or []
+        breadcrumbs = catalog.get('breadcrumbs') or []
+        price_info = sku_details.get('price') or {}
 
         # Manufacturer Name
         manufacturer_name = self.get_product_detail(product_details, 'manufacturer') or catalog.get('brand')
