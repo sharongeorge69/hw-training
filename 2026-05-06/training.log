@@ -1,0 +1,13 @@
+Initiated the high-precision parser for the Grainger platform, transforming raw HTML and JSON responses into structured records.
+
+Developed a custom Python export script tailored for Grainger.
+
+Conducted end-to-end testing of the Grainger export script.
+
+Performed a rigorous QA audit on the extracted sample data.
+
+Identified and resolved structural inconsistencies within the sample dataset.
+
+Concluded the Grainger project phase by finalizing the sanitized dataset and performing a final QA pass.
+
+
