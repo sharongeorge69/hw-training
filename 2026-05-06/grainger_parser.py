@@ -11,6 +11,7 @@ from pymongo import MongoClient
 from settings import (
     MONGO_URI, MONGO_DB, MONGO_COLLECTION_RESPONSE,
     MONGO_COLLECTION_DATA, MONGO_COLLECTION_URL_FAILED,
+    MONGO_RAW_RESPONSE_DB, MONGO_COLLECTION_RAW_RESPONSE,
     headers, cookies, EXTRACTION_DATE
 )
 from items import ProductDataItem
@@ -31,12 +32,15 @@ class GraingerParser:
         # PyMongo connection
         self.client = MongoClient(MONGO_URI)
         self.db = self.client[MONGO_DB]
+        self.raw_db = self.client[MONGO_RAW_RESPONSE_DB]
         self.url_collection = self.db[MONGO_COLLECTION_RESPONSE]
         self.product_collection = self.db[MONGO_COLLECTION_DATA]
+        self.raw_collection = self.raw_db[MONGO_COLLECTION_RAW_RESPONSE]
         self.failed_url_collection = self.db[MONGO_COLLECTION_URL_FAILED]
 
         # Create unique index
         self.product_collection.create_index("url", unique=True)
+        self.raw_collection.create_index("url", unique=True)
         logger.info("Connected to MongoDB")
 
     @staticmethod
@@ -62,7 +66,6 @@ class GraingerParser:
                 )
 
                 if response.status_code == 200:
-                    # Verify we got real product data, not a blocked/captcha page
                     if 'script id="__PRELOADED_STATE__"' in response.text:
                         return response.text
                     else:
@@ -109,7 +112,7 @@ class GraingerParser:
             product_details = self.get_nested(data, ["product", "productDetails"])
             gcom_products   = self.get_nested(data, ["product", "gcomProducts"]) or {}
             gcom_product    = gcom_products.get(sku) or (next(iter(gcom_products.values()), None) if gcom_products else None)
-            config_data     = self.get_nested(data, ["configData"]) or self.get_nested(data, ["product", "configData", sku]) or {}
+            config_data     = self.get_nested(data, ["product", "configData"]) or self.get_nested(data, ["configData"]) or self.get_nested(data, ["product", "configData", sku]) or {}
 
             #Manufacturer / Brand Name
             manufacturer_name = self.get_nested(product_details, ["external", "brandName"]) or ""
@@ -125,7 +128,6 @@ class GraingerParser:
             item_name = self.get_nested(config_data, ["digitalData", "page", "pageInfo", "contentTitle"]) or \
                         self.get_nested(config_data, ["digitalData", "productData", "productNm"]) or \
                         self.get_nested(product_details, ["primaryNoun"]) or ""
-
             # Full Product Description — Combine Description + Tech Specs
             raw_desc = self.get_nested(product_details, ["pdpDescription"]) or ""
             clean_desc = re.sub(r"<.*?>", "", raw_desc) # Strip HTML
@@ -212,6 +214,18 @@ class GraingerParser:
             }
 
             try:
+                # Save Raw Response
+                raw_item = {
+                    "url": pdp_url,
+                    "html_content": html_content,
+                    "extraction_date": EXTRACTION_DATE
+                }
+                self.raw_collection.update_one(
+                    {"url": pdp_url},
+                    {"$set": raw_item},
+                    upsert=True
+                )
+
                 product_item = ProductDataItem(**item)
                 product_item.validate()
                 self.product_collection.insert_one(item)
