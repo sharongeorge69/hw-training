@@ -1,3 +1,4 @@
+from PIL import GimpGradientFile
 import time
 import requests
 from pymongo import MongoClient
@@ -69,7 +70,7 @@ class Parser:
                 
                 # Navigate to the landing page that generates the token
                 target_url = "https://dubailand.gov.ae/en/eservices/real-estate-project-status-landing/real-estate-project-status/"
-                page.goto(target_url, wait_until="networkidle")
+                page.goto(target_url, wait_until="networkidle", timeout=60000)
                 
                 # The token is stored in sessionStorage
                 token = page.evaluate("sessionStorage.getItem('mashrooi-token')")
@@ -130,11 +131,7 @@ class Parser:
         try:
             item = {
                 "unique_id": unique_id,
-                "inspection_details": {
-                    "inspection_date": None,
-                    "current_progress": None,
-                    "inspection_images": []
-                },
+                "inspection_details": [],
                 "developer_details": {
                     "developer_name": None,
                     "developer_number": None,
@@ -163,10 +160,8 @@ class Parser:
                 proj = res.get("project", {})
                 title = proj.get("title", {})
                 
-                # Developer & Escrow details are mostly in the 'title' object
                 dev = title.get("developer", {})
                 if not dev:
-                    # Fallback to top-level if needed, but title seems more complete
                     dev = res.get("developer", {})
 
                 if dev:
@@ -179,7 +174,7 @@ class Parser:
                         "email": contact.get("email"),
                         "website": contact.get("url")
                     }
-                item["status"] = title.get("status", {}).get("englishName") # Status is in title
+                item["status"] = title.get("status", {}).get("englishName")
 
                 # Escrow Account (from title)
                 item["escrow_account"] = {
@@ -187,20 +182,19 @@ class Parser:
                     "escrow": title.get("escrowAccount")
                 }
 
-                # Inspection Details (Take most recent from inspections list)
+                # Inspection Details (Map all inspections)
                 inspections = res.get("inspections", [])
-                if inspections:
-                    latest = inspections[0]
-                    previous = inspections[1] if len(inspections) > 1 else None
-                    
-                    item["inspection_details"] = {
-                        "inspection_date": self.format_date(latest.get("date")),
-                        "current_progress": f"{latest.get('percentage')}%" if latest.get('percentage') is not None else None,
+                inspection_list = []
+                for j, insp in enumerate(inspections):
+                    previous = inspections[j+1] if j + 1 < len(inspections) else None
+                    inspection_list.append({
+                        "inspection_date": self.format_date(insp.get("date")),
+                        "current_progress": f"{insp.get('percentage')}%" if insp.get('percentage') is not None else None,
                         "previous_inspection": f"{previous.get('percentage')}%" if previous and previous.get('percentage') is not None else None,
-                        "inspection_images": [m.get("mediaUrl") for m in latest.get("media", []) if m.get("mediaType") == "Image"]
-                    }
+                        "inspection_images": [m.get("mediaUrl") for m in insp.get("media", []) if m.get("mediaType") == "Image"]
+                    })
+                item["inspection_details"] = inspection_list
 
-            # --- Map Mollak Data ---
             if mollak_data and "response" in mollak_data:
                 mollak_res = mollak_data["response"]
                 items = mollak_res.get("items", [])
