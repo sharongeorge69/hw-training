@@ -1,4 +1,3 @@
-from PIL import GimpGradientFile
 import time
 import requests
 from pymongo import MongoClient
