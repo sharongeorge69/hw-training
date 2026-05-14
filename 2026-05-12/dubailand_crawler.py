@@ -25,7 +25,7 @@ class Crawler:
         self.url_collection.create_index("project_number", unique=True)
         logger.info("Connected to MongoDB") 
 
-    def parse_item(self, response_json, project_number):
+    def parse_response(self, response_json, project_number):
         if not response_json:
             logger.error(f"Received empty response for {project_number}")
             return False
