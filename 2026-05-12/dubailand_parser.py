@@ -101,13 +101,17 @@ class Parser:
             return date_str
 
     def start(self):
-        total = self.url_collection.count_documents({})
-        logger.info(f"Total items to parse: {total}")
-
-        for idx, doc in enumerate(self.url_collection.find(), 1):
-            project_number = doc.get("project_number")
+        # total = self.url_collection.count_documents({})
+        # logger.info(f"Total items to parse: {total}")
+        # project_number = doc.get("project_number")
+        # for idx, doc in enumerate(self.url_collection.find(), 1):
+        project_numbers = ["1944"] 
+        total = len(project_numbers)
+        for idx, project_number in enumerate(project_numbers, 1):
+            # project_number = doc.get("project_number")
             if not project_number:
                 continue
+
 
             unique_id = str(project_number)
             logger.info(f"Processing Item {idx}/{total}: {unique_id}")
