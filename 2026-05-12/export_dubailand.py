@@ -28,6 +28,7 @@ def export_data():
         
         projection = {
             "_id": 0,
+            "unique_id": 1,
             "inspection_details": 1,
             "developer_details": 1,
             "management_companies": 1,
@@ -35,6 +36,11 @@ def export_data():
         }
         
         raw_data = list(collection.find({}, projection).limit(200))
+
+        # Rename unique_id to project_number
+        for item in raw_data:
+            if "unique_id" in item:
+                item["project_number"] = item.pop("unique_id")
         
         # Clean data (replace nulls, remove HTML, normalize spaces)
         data = clean_data(raw_data)
