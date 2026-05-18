@@ -1,0 +1,9 @@
+Conducted an introductory technical review of Burp Suite, focusing on its core proxy components, scope definitions, and targeted HTTP/S request interception capabilities..
+
+Generated and installed a custom Burp Suite CA certificate into the local machine's trusted root store, establishing the proxy chain required to decrypt secure HTTPS traffic and audit live network histories..
+
+Conducted market research on advanced mobile data extraction methodologies, comparing packet interception workflows, reverse-engineering architectures.
+
+Compiled comprehensive internal documentation summarizing mobile tool stacks, detailing the specific limitations and strategic trade-offs between API replication patterns and headful UI automation..
+
+
