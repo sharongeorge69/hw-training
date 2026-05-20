@@ -267,6 +267,10 @@ class BlinkitParser:
                     "promotion_description",
                     d.get("offer_tag", {}).get("title", {}).get("text", ""),
                 )
+                if "price" in d:
+                    result.setdefault("selling_price", d.get("price", ""))
+                if "normal_price" in d:
+                    result.setdefault("regular_price", d.get("normal_price", ""))
 
             # Rating/availability widget — overrides inventory and state
             if widget_type == "text_right_icons_rating_snippet_type":
@@ -277,7 +281,11 @@ class BlinkitParser:
                 result["inventory"] = inventory
                 result["product_state"] = state
                 result["merchant_id"] = tracking.get("merchant_id", "")
-                result["rating"] = tracking.get("rating", "")
+                result["product_rating"] = tracking.get("rating", "")
+                if "price" in tracking:
+                    result["selling_price"] = tracking.get("price", "")
+                if "mrp" in tracking:
+                    result["regular_price"] = tracking.get("mrp", "")
                 result["is_sold_out"] = (
                     state in ("out_of_stock", "sold_out", "unavailable")
                     or inventory == 0
@@ -422,16 +430,6 @@ class BlinkitParser:
         selling_price = seo.get("price", "")
         regular_price = seo.get("mrp", "")
 
-        # "How to Use" instruction from SEO attributes list
-        usage_instruction = next(
-            (
-                attr.get("value", "")
-                for attr in (seo.get("attributes") or [])
-                if attr.get("name") == "How to Use"
-            ),
-            "",
-        )
-
         # Run all extractors
         image_urls = self._extract_images(snippets)
         breadcrumbs, category_name = self._extract_breadcrumbs(snippets, product_name)
@@ -439,6 +437,10 @@ class BlinkitParser:
         product_details = self._extract_product_details(snippets, updater_data)
         related_products = self._extract_related_products(snippets)
         grammage = self._extract_grammage(snippets, updater_data)
+
+        # Pricing fallbacks
+        selling_price = selling_price or pricing.get("selling_price", "")
+        regular_price = regular_price or pricing.get("regular_price", "")
 
         description = product_details.get("Description", "")
         promotion_description = pricing.get("promotion_description", "")
@@ -451,6 +453,13 @@ class BlinkitParser:
             (v for k, v in product_details.items() if k.strip().lower() == "seller"),
             "",
         )
+        usage_instruction = next(
+            (v for k, v in product_details.items() if k.strip().lower() == "how to use"),
+            "",
+        )
+        
+    
+
 
         unique_id = pricing.get("product_id", "") or meta.get("pdp_url", "").split("/")[-1]
 
@@ -463,7 +472,7 @@ class BlinkitParser:
         item["breadcrumbs"] = breadcrumbs
         item["category_name"] = category_name
         item["selling_price"] = str(selling_price) if selling_price is not None else ""
-        item["regular_price"] = regular_price
+        item["regular_price"] = str(regular_price) if regular_price is not None else ""
         item["discount_percentage"] = discount_percentage
         item["promotion_description"] = promotion_description
         item["grammage"] = grammage
@@ -478,7 +487,7 @@ class BlinkitParser:
         item["stock_quantity"] = pricing.get("inventory", 0)
         item["highlights"] = product_details
         item["store_id"] = str(pricing.get("merchant_id", "") or "")
-        item["product_rating"] = str(pricing.get("rating", ""))
+        item["product_rating"] = str(pricing.get("product_rating", pricing.get("rating", "")))
         item["category_rank"] = meta.get("rank")
         item["extraction_datetime"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         item["page_depth"] = meta.get("page")
