@@ -1,0 +1,9 @@
+Provisioned a physical Android test unit via ADB (Android Debug Bridge) over USB, enabling debugging rights and preparing the hardware environment to mirror emulator-level instrumentation.
+
+Configured the Wi-Fi network interface on the physical terminal with a custom manual proxy gateway, successfully routing outbound mobile device requests directly through the local Burp Suite Professional listener instance.
+
+Bypass Resolution (Swiggy): Investigated runtime SSL Pinning blockages within the Swiggy application fabric; analyzed the failure vectors triggered by custom CA profiles against network traffic interception layers to map out target hooks.
+
+Conducted an in-depth investigation into emulator hardware fingerprints.
+
+
