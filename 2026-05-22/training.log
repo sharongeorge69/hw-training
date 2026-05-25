@@ -1,0 +1,7 @@
+Conducted comprehensive research into advanced SSL Pinning bypass methodologies for Android mobile applications.
+
+Configured Burp Suite alongside a rooted emulator environment to test dynamic certificate unpinning, executing custom Frida scripts.
+
+Utilized HTTP Toolkit to intercept and bypass resilient SSL pinning blocks.
+
+
