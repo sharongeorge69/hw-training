@@ -59,7 +59,7 @@ class Crawler:
         logger.info("Connected to MongoDB")
 
 
-    def parse_item(self, product, category_url, category_name):
+    def parse_item(self, product, category_url):
         uid = product.get("uid")
         product_id = str(uid)
         if not product_id:
@@ -142,7 +142,7 @@ class Crawler:
         saved_count = 0
 
         for product in items:
-            parsed = self.parse_item(product, category_url, category_name)
+            parsed = self.parse_item(product, category_url)
             if not parsed:
                 continue
 
