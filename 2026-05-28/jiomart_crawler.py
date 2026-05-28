@@ -79,10 +79,7 @@ class Crawler:
         taxonomy_parts = [l1_category,l2_category,l3_category]
         taxonomy = " > ".join([part for part in taxonomy_parts if part])
 
-        categories = product.get("categories", [])
-        cat_name = category_name or ""
-        if not cat_name and categories:
-            cat_name = categories[0].get("name", "")
+        cat_name = l3_category
 
         price = product.get("price", {}) or {}
         effective = price.get("effective", {}) or {}
