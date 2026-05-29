@@ -96,11 +96,13 @@ class Crawler:
 
         country_of_origin = product.get("country_of_origin", "")
         seller_id = product.get("seller_id", "")
+        sizes = product.get("sizes", "")
         sku_code = product.get("sku_code", "")
         extraction_date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
 
         item = {}
+        item['slug'] = slug
         item['product_url'] = product_url
         item['product_id'] = product_id
         item['category_url'] = category_url
@@ -117,6 +119,9 @@ class Crawler:
         item['country_of_origin'] = country_of_origin or ""
         item['extraction_date'] = extraction_date
         item['seller_id'] = str(seller_id) if seller_id else ""
+        item['sizes'] = sizes
+        
+        
         return item
 
     def fetch_page(self, f_param, page_no, page_size=40):
